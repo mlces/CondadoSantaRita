@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.0.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.9" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Core\Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Mylces.ControlCenter">
+      <HintPath>D:\OneDrive\Respaldo\Documentos\Visual Studio 2022\Projects\Componentes\Mylces.ControlCenter\Mylces.ControlCenter\bin\Debug\net6.0\Mylces.ControlCenter.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>
