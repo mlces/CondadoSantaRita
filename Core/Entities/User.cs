@@ -15,6 +15,7 @@ namespace Core.Entities
         public string PasswordHash { get; set; } = null!;
         public DateTime RegistrationDate { get; set; }
         public bool Disabled { get; set; }
+        public bool ResetPassword { get; set; }
 
         public virtual Person Person { get; set; } = null!;
 

@@ -34,7 +34,7 @@ namespace Web.Pages
 
             try
             {
-                var response = await _httpClient.PostAsJsonAsync("Users", Input);
+                var response = await _httpClient.PostAsJsonAsync("Users/RequestToken", Input);
 
                 if (!response.IsSuccessStatusCode)
                 {

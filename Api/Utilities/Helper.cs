@@ -1,4 +1,6 @@
 ﻿using Humanizer;
+using System.Security.Claims;
+using static Api.Tokens.TokenManager;
 
 namespace Api.Utilities
 {
@@ -24,6 +26,17 @@ namespace Api.Utilities
             }
             result = result.Replace("uno", "un");
             return result.Humanize(LetterCasing.Sentence);
+        }
+
+        public static bool TokenIsLogin(this ClaimsPrincipal user)
+        {
+            var userTokenType = user.FindFirst(ClaimTypes.Version).Value.ToString();
+
+            if (userTokenType == nameof(TokenType.Login))
+            {
+                return true;
+            }
+            return false;
         }
     }
 }

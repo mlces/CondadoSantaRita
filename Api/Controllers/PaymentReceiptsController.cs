@@ -50,6 +50,7 @@ namespace Api.Controllers
             catch (Exception ex)
             {
                 var errorId = Configuration.LogError(ex.ToString());
+                response.Code = -1;
                 response.Message = $"Ha ocurrido un error, intente nuevamente o reporte el error: {errorId}.";
                 return Ok(response);
             }

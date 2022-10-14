@@ -1,4 +1,7 @@
-﻿using Infrastructure.Persistence;
+﻿using Api.Tokens;
+using Infrastructure.Persistence;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -21,15 +24,16 @@ namespace Api.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> Token(TokenRequest request)
+        [Route("[action]")]
+        public async Task<ActionResult> RequestToken(TokenRequest request)
         {
             var response = new Response<TokenResponse<User>>();
-
+            TokenManager tokenManager = new();
             try
             {
                 var user = await _context.Users
                     .Include(o => o.Rols)
-                    .FirstOrDefaultAsync(o => o.Username == request.Username && o.Disabled == false);
+                    .FirstOrDefaultAsync(o => o.Username == request.Username);
 
                 if (user == null)
                 {
@@ -37,58 +41,99 @@ namespace Api.Controllers
                     return Ok(response);
                 }
 
-                PasswordHasher<User> passwordHasher = new();
-
-                if (passwordHasher.VerifyHashedPassword(user, user.PasswordHash, request.Password) == PasswordVerificationResult.Failed)
+                if (user.Disabled)
                 {
-                    response.Message = "Las credenciales son incorrectas.";
+                    response.Message = "Usuario deshabilitado, contacta a un administrador.";
                     return Ok(response);
                 }
 
-                return GenerateToken(user);
+                if (user.ResetPassword)
+                {
+                    if (user.PasswordHash == request.Password)
+                    {
+                        response.Code = 1;
+                        response.Message = "Ingresa una nueva contraseña para poder acceder.";
+                        response.Data = tokenManager.GenerateToken(user, TokenManager.TokenType.ResetPassword);
+                        return Ok(response);
+                    }
+                    else
+                    {
+                        response.Message = "Las credenciales son incorrectas.";
+                        return Ok(response);
+                    }
+                }
+                else
+                {
+                    PasswordHasher<User> passwordHasher = new();
+
+                    if (passwordHasher.VerifyHashedPassword(user, user.PasswordHash, request.Password) == PasswordVerificationResult.Failed)
+                    {
+                        response.Message = "Las credenciales son incorrectas.";
+                        return Ok(response);
+                    }
+
+                    response.Code = 0;
+                    response.Data = tokenManager.GenerateToken(user, TokenManager.TokenType.Login);
+                    return Ok(response);
+                }
             }
             catch (Exception ex)
             {
                 var errorId = Configuration.LogError(ex.ToString());
+                response.Code = -1;
                 response.Message = $"Ha ocurrido un error, intente nuevamente o reporte el error: {errorId}.";
                 return Ok(response);
             }
         }
 
-        private ActionResult GenerateToken(User user)
+        [HttpPost]
+        [Route("[action]")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public async Task<ActionResult> ResetPassword(PasswordRequest request)
         {
-            var claims = new List<Claim>
+            var response = new Response<TokenResponse<User>>();
+            TokenManager tokenManager = new();
+            try
             {
-                new(ClaimTypes.Actor, user.PersonId.ToString())
-            };
-            foreach (var rol in user.Rols)
-            {
-                claims.Add(new(ClaimTypes.Role, rol.Name));
-            }
-
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration.TokenSigningKey));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-            var expires = DateTime.Now.AddHours(Configuration.TokenValidityHours);
-
-            JwtSecurityToken token = new(
-                issuer: Configuration.TokenIssuer,
-                audience: Configuration.TokenAudience,
-                claims: claims,
-                expires: expires,
-                signingCredentials: creds
-                );
-
-            return Ok(new Response<TokenResponse<User>>()
-            {
-                Code = 0,
-                Message = null,
-                Data = new()
+                if (User.TokenIsLogin())
                 {
-                    AccessToken = new JwtSecurityTokenHandler().WriteToken(token),
-                    ExpiresIn = expires,
-                    Data = user
+                    response.Message = "Ha ocurrido un error, intenta nuevamente.";
+                    return Ok(response);
                 }
-            });
+
+                var user = await _context.Users
+                    .Include(o => o.Rols)
+                    .FirstOrDefaultAsync(o => o.Username == request.Username);
+
+                if (user == null)
+                {
+                    response.Message = "Las credenciales son incorrectas.";
+                    return Ok(response);
+                }
+
+                if (user.Disabled)
+                {
+                    response.Message = "Usuario deshabilitado, contacta a un administrador.";
+                    return Ok(response);
+                }
+
+                PasswordHasher<User> passwordHasher = new();
+                user.PasswordHash = passwordHasher.HashPassword(user, request.Password);
+                user.ResetPassword = false;
+                _context.Update(user);
+                await _context.SaveChangesAsync();
+
+                response.Code = 0;
+                response.Data = tokenManager.GenerateToken(user, TokenManager.TokenType.Login);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                var errorId = Configuration.LogError(ex.ToString());
+                response.Code = -1;
+                response.Message = $"Ha ocurrido un error, intente nuevamente o reporte el error: {errorId}.";
+                return Ok(response);
+            }
         }
     }
 }
