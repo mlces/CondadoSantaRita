@@ -58,7 +58,7 @@ namespace Api.Controllers
         }
 
         [HttpGet]
-        [Route("{personId}/[action]")]
+        [Route("[action]")]
         public async Task<ActionResult> Contracts()
         {
             var response = new Response<List<Contract>>();
