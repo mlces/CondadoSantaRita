@@ -15,6 +15,7 @@ builder.Services.AddServerSideBlazor();
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(options =>
 {
     options.LoginPath = Constants.PageIngresar;
+    options.AccessDeniedPath = Constants.PageIndex;
 });
 
 builder.Services.AddScoped(sp => new HttpClient
