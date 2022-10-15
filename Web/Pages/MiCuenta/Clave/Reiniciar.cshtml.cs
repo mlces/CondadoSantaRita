@@ -1,11 +1,13 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Security.Claims;
 
 namespace Web.Pages.MiCuenta.Clave
 {
+    [Authorize]
     public class ReiniciarModel : PageModel
     {
         private readonly HttpClient _httpClient;
@@ -24,13 +26,9 @@ namespace Web.Pages.MiCuenta.Clave
         public ActionResult OnGet()
         {
             Message = string.Empty;
-            if (User.Identity.IsAuthenticated)
+            if (!User.TokenIsReset())
             {
-                if (!User.TokenIsReset())
-                {
-                    return RedirectToPage(Constants.PageSalir);
-                }
-                return Page();
+                return RedirectToPage(Constants.PageIndex);
             }
             return Page();
         }
@@ -40,6 +38,11 @@ namespace Web.Pages.MiCuenta.Clave
             if (!ModelState.IsValid)
             {
                 return Page();
+            }
+
+            if (!User.TokenIsReset())
+            {
+                return RedirectToPage(Constants.PageIndex);
             }
 
             try

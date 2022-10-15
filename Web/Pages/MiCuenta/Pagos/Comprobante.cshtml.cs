@@ -1,9 +1,11 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Security.Claims;
 
 namespace Web.Pages.MiCuenta.Pagos
 {
+    [Authorize]
     public class ComprobanteModel : PageModel
     {
         private readonly HttpClient _httpClient;
@@ -20,25 +22,42 @@ namespace Web.Pages.MiCuenta.Pagos
         {
             if (User.TokenIsReset())
             {
-                return RedirectToPage("/MiCuenta/Clave/Reiniciar");
+                return RedirectToPage(Constants.PageReiniciar);
             }
 
             try
             {
                 _httpClient.DefaultRequestHeaders.Authorization = new("Bearer", User.FindFirst(ClaimTypes.Authentication).Value);
 
-                var response = await _httpClient.GetFromJsonAsync<Response<PaymentReceipt>>($"PaymentReceipts/{id}");
+                var response = await _httpClient.GetAsync($"PaymentReceipts/{id}");
 
-                if (response.Code != ResponseCode.Ok)
+                if (response.StatusCode == HttpStatusCode.Unauthorized)
                 {
-                    return RedirectToPage("/Error");
+                    return RedirectToPage(Constants.PageSalir);
                 }
 
-                return File(response.Data.Data, "application/pdf");
+                if (!response.IsSuccessStatusCode)
+                {
+                    return RedirectToPage(Constants.PageError);
+                }
+
+                var content = await response.Content.ReadFromJsonAsync<Response<PaymentReceipt>>();
+
+                if (content.Code == ResponseCode.Unauthorized)
+                {
+                    return RedirectToPage(Constants.PageReiniciar);
+                }
+
+                if (content.Code != ResponseCode.Ok)
+                {
+                    return RedirectToPage(Constants.PageError);
+                }
+
+                return File(content.Data.Data, "application/pdf");
             }
             catch (Exception)
             {
-                return RedirectToPage("/Error");
+                return RedirectToPage(Constants.PageError);
             }
         }
     }

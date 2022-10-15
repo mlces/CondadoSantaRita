@@ -1,9 +1,11 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Security.Claims;
 
 namespace Web.Pages.MiCuenta
 {
+    [Authorize]
     public class LotesModel : PageModel
     {
         private readonly HttpClient _httpClient;
@@ -16,24 +18,45 @@ namespace Web.Pages.MiCuenta
 
         public async Task<ActionResult> OnGet()
         {
+            if (User.TokenIsReset())
+            {
+                return RedirectToPage(Constants.PageReiniciar);
+            }
+
             try
             {
                 _httpClient.DefaultRequestHeaders.Authorization = new("Bearer", User.FindFirst(ClaimTypes.Authentication).Value);
 
-                var personId = User.FindFirst(ClaimTypes.Actor).Value;
+                var response = await _httpClient.GetAsync("People/Contracts");
 
-                var response = await _httpClient.GetFromJsonAsync<Response<List<Contract>>>($"People/{personId}/Contracts");
-
-                if (response.Code == 0)
+                if (response.StatusCode == HttpStatusCode.Unauthorized)
                 {
-                    Contracts = response.Data;
+                    return RedirectToPage(Constants.PageSalir);
                 }
 
+                if (!response.IsSuccessStatusCode)
+                {
+                    return RedirectToPage(Constants.PageError);
+                }
+
+                var content = await response.Content.ReadFromJsonAsync<Response<List<Contract>>>();
+
+                if (content.Code == ResponseCode.Unauthorized)
+                {
+                    return RedirectToPage(Constants.PageReiniciar);
+                }
+
+                if (content.Code != ResponseCode.Ok)
+                {
+                    return RedirectToPage(Constants.PageError);
+                }
+
+                Contracts = content.Data;
                 return Page();
             }
             catch (Exception)
             {
-                return RedirectToPage("/Error");
+                return RedirectToPage(Constants.PageError);
             }
         }
     }

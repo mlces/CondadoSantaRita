@@ -12,7 +12,10 @@ builder.Services.AddRazorPages();
 
 builder.Services.AddServerSideBlazor();
 
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie();
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(options =>
+{
+    options.LoginPath = Constants.PageIngresar;
+});
 
 builder.Services.AddScoped(sp => new HttpClient
 {

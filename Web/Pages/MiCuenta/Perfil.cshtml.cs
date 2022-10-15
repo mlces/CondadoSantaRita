@@ -1,9 +1,11 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Security.Claims;
 
 namespace Web.Pages.MiCuenta
 {
+    [Authorize]
     public class PerfilModel : PageModel
     {
         private readonly HttpClient _httpClient;
@@ -19,32 +21,35 @@ namespace Web.Pages.MiCuenta
         {
             if (User.TokenIsReset())
             {
-                return RedirectToPage("/MiCuenta/Clave/Reiniciar");
+                return RedirectToPage(Constants.PageReiniciar);
             }
 
             try
             {
                 _httpClient.DefaultRequestHeaders.Authorization = new("Bearer", User.FindFirst(ClaimTypes.Authentication).Value);
 
-                var personId = User.FindFirst(ClaimTypes.Actor).Value;
-
-                var response = await _httpClient.GetAsync($"People/{personId}");
-
-                if (!response.IsSuccessStatusCode)
-                {
-                    return RedirectToPage("/Error");
-                }
+                var response = await _httpClient.GetAsync("People");
 
                 if (response.StatusCode == HttpStatusCode.Unauthorized)
                 {
-                    return RedirectToPage("/MiCuenta/Salir");
+                    return RedirectToPage(Constants.PageSalir);
+                }
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    return RedirectToPage(Constants.PageError);
                 }
 
                 var content = await response.Content.ReadFromJsonAsync<Response<Person>>();
 
+                if (content.Code == ResponseCode.Unauthorized)
+                {
+                    return RedirectToPage(Constants.PageReiniciar);
+                }
+
                 if (content.Code != ResponseCode.Ok)
                 {
-                    return RedirectToPage("/Error");
+                    return RedirectToPage(Constants.PageError);
                 }
 
                 Person = content.Data;
@@ -52,7 +57,7 @@ namespace Web.Pages.MiCuenta
             }
             catch (Exception)
             {
-                return RedirectToPage("/Error");
+                return RedirectToPage(Constants.PageError);
             }
         }
     }

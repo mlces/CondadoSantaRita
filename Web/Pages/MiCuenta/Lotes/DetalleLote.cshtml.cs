@@ -1,9 +1,11 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Security.Claims;
 
 namespace Web.Pages.MiCuenta.Lotes
 {
+    [Authorize]
     public class DetalleLoteModel : PageModel
     {
         private readonly HttpClient _httpClient;
@@ -24,32 +26,68 @@ namespace Web.Pages.MiCuenta.Lotes
         {
             if (User.TokenIsReset())
             {
-                return RedirectToPage("/MiCuenta/Clave/Reiniciar");
+                return RedirectToPage(Constants.PageReiniciar);
             }
 
             try
             {
                 _httpClient.DefaultRequestHeaders.Authorization = new("Bearer", User.FindFirst(ClaimTypes.Authentication).Value);
 
-                var response = await _httpClient.GetFromJsonAsync<Response<Contract>>($"Contracts/{id}");
+                var response = await _httpClient.GetAsync($"Contracts/{id}");
 
-                if (response.Code == 0)
+                if (response.StatusCode == HttpStatusCode.Unauthorized)
                 {
-                    Contract = response.Data;
+                    return RedirectToPage(Constants.PageSalir);
                 }
 
-                var response2 = await _httpClient.GetFromJsonAsync<Response<List<Payment>>>($"Contracts/{id}/Payments");
-
-                if (response2.Code == 0)
+                if (!response.IsSuccessStatusCode)
                 {
-                    Payments = response2.Data;
+                    return RedirectToPage(Constants.PageError);
                 }
 
+                var content = await response.Content.ReadFromJsonAsync<Response<Contract>>();
+
+                if (content.Code == ResponseCode.Unauthorized)
+                {
+                    return RedirectToPage(Constants.PageReiniciar);
+                }
+
+                if (content.Code != ResponseCode.Ok)
+                {
+                    return RedirectToPage(Constants.PageError);
+                }
+
+                var response2 = await _httpClient.GetAsync($"Contracts/{id}/Payments");
+
+                if (response2.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    return RedirectToPage(Constants.PageSalir);
+                }
+
+                if (!response2.IsSuccessStatusCode)
+                {
+                    return RedirectToPage(Constants.PageError);
+                }
+
+                var content2 = await response2.Content.ReadFromJsonAsync<Response<List<Payment>>>();
+
+                if (content2.Code == ResponseCode.Unauthorized)
+                {
+                    return RedirectToPage(Constants.PageReiniciar);
+                }
+
+                if (content2.Code != ResponseCode.Ok)
+                {
+                    return RedirectToPage(Constants.PageError);
+                }
+
+                Contract = content.Data;
+                Payments = content2.Data;
                 return Page();
             }
             catch (Exception)
             {
-                return RedirectToPage("/Error");
+                return RedirectToPage(Constants.PageError);
             }
         }
     }

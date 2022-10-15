@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace Api.Controllers
 {
@@ -19,16 +20,20 @@ namespace Api.Controllers
         }
 
         [HttpGet]
-        [Route("{personId}")]
-        public async Task<ActionResult> People(int personId)
+        public async Task<ActionResult> People()
         {
-            if (User.TokenIsReset())
-            {
-                return Unauthorized();
-            }
             var response = new Response<Person>();
             try
             {
+                if (User.TokenIsReset())
+                {
+                    response.Code = ResponseCode.Unauthorized;
+                    response.Message = ResponseMessage.AnErrorHasOccurred;
+                    return Ok(response);
+                }
+
+                var personId = int.Parse(User.FindFirst(ClaimTypes.Actor).Value.ToString());
+
                 var person = await _context.People
                     .Include(o => o.Address.City.State)
                     .FirstOrDefaultAsync(o => o.PersonId == personId);
@@ -39,7 +44,7 @@ namespace Api.Controllers
                     return Ok(response);
                 }
 
-                response.Code = 0;
+                response.Code = ResponseCode.Ok;
                 response.Data = person;
                 return Ok(response);
             }
@@ -54,21 +59,26 @@ namespace Api.Controllers
 
         [HttpGet]
         [Route("{personId}/[action]")]
-        public async Task<ActionResult> Contracts(int personId)
+        public async Task<ActionResult> Contracts()
         {
-            if (User.TokenIsReset())
-            {
-                return Unauthorized();
-            }
             var response = new Response<List<Contract>>();
             try
             {
+                if (User.TokenIsReset())
+                {
+                    response.Code = ResponseCode.Unauthorized;
+                    response.Message = ResponseMessage.AnErrorHasOccurred;
+                    return Ok(response);
+                }
+
+                var personId = int.Parse(User.FindFirst(ClaimTypes.Actor).Value.ToString());
+
                 var contracts = await _context.Contracts
                     .Include(o => o.Property)
                     .Where(o => o.PersonId == personId)
                     .ToListAsync();
 
-                response.Code = 0;
+                response.Code = ResponseCode.Ok;
                 response.Data = contracts;
                 return Ok(response);
             }
