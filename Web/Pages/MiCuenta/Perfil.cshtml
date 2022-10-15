@@ -4,38 +4,58 @@
     ViewData["Title"] = "Perfil";
 }
 
-<section class="csr-section-profile">
+<div class="mb-5 mt-5">
     <div class="container">
-        <div class="row">
-            <div class="col-md-3 text-center">
-                <h3>Perfil</h3><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16" class="bi bi-person-fill csr-icon-profile">
-                    <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"></path>
-                </svg>
+        <div class="rounded-3 shadow-lg" style="background: var(--bs-gray-100);padding: 2rem;">
+            <div class="row">
+                <div class="col-12 col-md-12 text-center"><img src="../assets/img/profile.png" style="width: 7rem;"></div>
+                <div class="col-12 text-center mt-3">
+                    <h4>Información personal</h4>
+                </div>
+                <div class="col-12 col-md-6 mt-3">
+                    <label class="form-label">Nombre</label>
+                    <input type="text" class="form-control" readonly="" value="@Model.Person.FirstName">
+                </div>
+                <div class="col-12 col-md-6 mt-3">
+                    <label class="form-label">Apellido</label>
+                    <input type="text" class="form-control" readonly="" value="@Model.Person.LastName">
+                </div>
+                <div class="col-12 col-md-6 mt-3">
+                    <label class="form-label">CUI</label>
+                    <input type="text" class="form-control" readonly="" value="@Model.Person.NationalId">
+                </div>
+                <div class="col-12 col-md-6 mt-3">
+                    <label class="form-label">Nacimiento</label>
+                    <input type="text" class="form-control" readonly="" value="@Model.Person.Birthday.Value.ToString("dd/MM/yyyy")">
+                </div>
             </div>
-            <div class="col-md-9">
-                <h5>Información Personal</h5>
-                <div class="row">
-                    <div class="col-md-6 mb-3"><label class="form-label">Nombre</label><input type="text" class="form-control" readonly="" value="@Model.Person.FirstName"></div>
-                    <div class="col-md-6 mb-3"><label class="form-label">Apellido</label><input type="text" class="form-control" readonly="" value="@Model.Person.LastName"></div>
+        </div>
+        <div class="mt-5 rounded-3 shadow-lg" style="background: var(--bs-gray-100);padding: 2rem;">
+            <div class="row">
+                <div class="col-12 text-center">
+                    <h4>Información de contacto</h4>
                 </div>
-                <div class="row">
-                    <div class="col-md-6 mb-3"><label class="form-label">CUI</label><input type="text" class="form-control" readonly="" value="@Model.Person.NationalId"></div>
-                    <div class="col-md-6 mb-3"><label class="form-label">Nacimiento</label><input type="text" class="form-control" readonly="" value="@Model.Person.Birthday.Value.ToString("dd/MM/yyyy")"></div>
+                <div class="col-12 col-md-6 mt-3">
+                    <label class="form-label">Correo</label>
+                    <input type="text" class="form-control" readonly="" value="@Model.Person.EmailAddress">
                 </div>
-                <hr>
-                <h5>Información de contacto</h5>
-                <div class="row">
-                    <div class="col-md-6 mb-3"><label class="form-label">Correo</label><input type="text" class="form-control" readonly="" value="@Model.Person.EmailAddress"></div>
-                    <div class="col-md-6 mb-3"><label class="form-label">Teléfono</label><input type="text" class="form-control" readonly="" value="@Model.Person.PhoneNumber"></div>
+                <div class="col-12 col-md-6 mt-3">
+                    <label class="form-label">Teléfono</label>
+                    <input type="text" class="form-control" readonly="" value="@Model.Person.PhoneNumber">
                 </div>
-                <div class="row">
-                    <div class="col-md-12 mb-3"><label class="form-label">Direccion</label><input type="text" class="form-control" readonly="" value="@Model.Person.Address.Name"></div>
+                <div class="col-12 mt-3">
+                    <label class="form-label">Dirección</label>
+                    <input type="text" class="form-control" readonly="" value="@Model.Person.Address.Name">
                 </div>
-                <div class="row">
-                    <div class="col-md-6 mb-3"><label class="form-label">Departamento</label><input type="text" class="form-control" readonly="" value="@Model.Person.Address.City.State.Name"></div>
-                    <div class="col-md-6 mb-3"><label class="form-label">Municipio</label><input type="text" class="form-control" readonly="" value="@Model.Person.Address.City.Name"></div>
+                <div class="col-12 col-md-6 mt-3">
+                    <label class="form-label">Departamento</label>
+                    <input type="text" class="form-control" readonly="" value="@Model.Person.Address.City.State.Name">
+                </div>
+                <div class="col-12 col-md-6 mt-3">
+                    <label class="form-label">Municipio</label>
+                    <input type="text" class="form-control" readonly="" value="@Model.Person.Address.City.Name">
                 </div>
             </div>
         </div>
     </div>
-</section>
+</div>

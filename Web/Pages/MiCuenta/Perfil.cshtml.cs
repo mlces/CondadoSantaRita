@@ -17,19 +17,37 @@ namespace Web.Pages.MiCuenta
 
         public async Task<ActionResult> OnGet()
         {
+            if (User.TokenIsReset())
+            {
+                return RedirectToPage("/MiCuenta/Clave/Reiniciar");
+            }
+
             try
             {
                 _httpClient.DefaultRequestHeaders.Authorization = new("Bearer", User.FindFirst(ClaimTypes.Authentication).Value);
 
                 var personId = User.FindFirst(ClaimTypes.Actor).Value;
 
-                var response = await _httpClient.GetFromJsonAsync<Response<Person>>($"People/{personId}");
+                var response = await _httpClient.GetAsync($"People/{personId}");
 
-                if (response.Code == 0)
+                if (!response.IsSuccessStatusCode)
                 {
-                    Person = response.Data;
+                    return RedirectToPage("/Error");
                 }
 
+                if (response.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    return RedirectToPage("/MiCuenta/Salir");
+                }
+
+                var content = await response.Content.ReadFromJsonAsync<Response<Person>>();
+
+                if (content.Code != ResponseCode.Ok)
+                {
+                    return RedirectToPage("/Error");
+                }
+
+                Person = content.Data;
                 return Page();
             }
             catch (Exception)

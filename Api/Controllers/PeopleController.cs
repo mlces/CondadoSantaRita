@@ -1,12 +1,14 @@
-﻿using Core.Entities;
-using Infrastructure.Persistence;
+﻿using Infrastructure.Persistence;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace Api.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class PeopleController : ControllerBase
     {
         private readonly ApplicationContext _context;
@@ -20,6 +22,10 @@ namespace Api.Controllers
         [Route("{personId}")]
         public async Task<ActionResult> People(int personId)
         {
+            if (User.TokenIsReset())
+            {
+                return Unauthorized();
+            }
             var response = new Response<Person>();
             try
             {
@@ -29,7 +35,7 @@ namespace Api.Controllers
 
                 if (person == null)
                 {
-                    response.Message = "Ha ocurrido un error, intente nuevamente.";
+                    response.Message = ResponseMessage.AnErrorHasOccurred;
                     return Ok(response);
                 }
 
@@ -40,8 +46,8 @@ namespace Api.Controllers
             catch (Exception ex)
             {
                 var errorId = Configuration.LogError(ex.ToString());
-                response.Code = -1;
-                response.Message = $"Ha ocurrido un error, intente nuevamente o reporte el error: {errorId}.";
+                response.Code = ResponseCode.BadRequest;
+                response.Message = ResponseMessage.AnErrorHasOccurredAndId(errorId);
                 return Ok(response);
             }
         }
@@ -50,6 +56,10 @@ namespace Api.Controllers
         [Route("{personId}/[action]")]
         public async Task<ActionResult> Contracts(int personId)
         {
+            if (User.TokenIsReset())
+            {
+                return Unauthorized();
+            }
             var response = new Response<List<Contract>>();
             try
             {
@@ -65,8 +75,8 @@ namespace Api.Controllers
             catch (Exception ex)
             {
                 var errorId = Configuration.LogError(ex.ToString());
-                response.Code = -1;
-                response.Message = $"Ha ocurrido un error, intente nuevamente o reporte el error: {errorId}.";
+                response.Code = ResponseCode.BadRequest;
+                response.Message = ResponseMessage.AnErrorHasOccurredAndId(errorId);
                 return Ok(response);
             }
         }

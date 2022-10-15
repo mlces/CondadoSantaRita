@@ -1,52 +1,66 @@
-.navbar {
-  background: #578bf2;
-}
-
-.body {
+body {
   background: #dfe9fb;
   font-family: Poppins, sans-serif;
 }
 
-.csr-image-brand {
-  width: 80px;
+.csr-brand {
+  width: 5rem;
 }
 
 @media (min-width: 576px) {
-  .csr-image-brand {
-    width: 90px;
+  .csr-brand {
+    width: 6rem;
   }
 }
 
 @media (min-width: 768px) {
-  .csr-image-brand {
-    width: 100px;
+  .csr-brand {
+    width: 7rem;
   }
 }
 
 @media (min-width: 992px) {
-  .csr-image-brand {
-    width: 110px;
+  .csr-brand {
+    width: 8rem;
   }
 }
 
-@media (min-width: 1200px) {
-  .csr-image-brand {
-    width: 120px;
-  }
+.csr-navbar-color {
+  background: #578bf2;
 }
 
-@media (min-width: 1400px) {
-  .csr-image-brand {
-    width: 130px;
-  }
+.csr-login-icon {
+  font-size: 70px;
+  color: #021e73;
+}
+
+.csr-section-login {
+  padding-top: 50px;
+}
+
+.csr-img-profile {
+  width: 120px;
+}
+
+.csr-div-ingresar {
+  background: white;
+  width: 500px;
+  padding: 40px;
+  max-width: 90%;
+  box-shadow: 14px 14px 20px 0 rgba(20, 20, 20, 0.3);
+}
+
+.csr-img-perfil {
+  width: 50%;
+  max-width: 150px;
 }
 
 .csr-image-banner {
   width: 100%;
   object-fit: cover;
   height: 140px;
-  border-top: 1px solid rgb(14,31,64) ;
-  border-bottom: 1px solid rgb(14,31,64) ;
+  border-top: 1px solid rgb(14,31,64);
+  border-bottom: 1px solid rgb(14,31,64);
 }
 
 @media (min-width: 576px) {
@@ -77,52 +91,5 @@
   .csr-image-banner {
     height: 500px;
   }
-}
-
-.csr-section-banner {
-  margin-top: 20px;
-}
-
-.csr-section-products {
-}
-
-.csr-card-column-secondary {
-}
-
-.csr-card-container-secondary {
-}
-
-.csr-container-card-secondary {
-  margin-top: 20px;
-}
-
-.csr-column-card-secondary {
-  padding-top: 20px;
-}
-
-.footer {
-  background: #578bf2;
-  margin-top: 20px;
-}
-
-.csr-validation-message {
-  font-size: 12px;
-}
-
-.csr-section-lotes {
-  margin-top: 30px;
-}
-
-.csr-table-header {
-  background: #021e73;
-}
-
-.csr-section-profile {
-  margin-top: 20px;
-}
-
-.csr-icon-profile {
-  font-size: 100px;
-  color: #021e73;
 }
 

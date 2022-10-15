@@ -1,8 +1,9 @@
+global using Api.Utilities;
 global using Core.Entities;
 global using Core.Models.Request;
 global using Core.Models.Response;
 global using Infrastructure;
-global using Api.Utilities;
+using Api.Tokens;
 using Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -34,6 +35,8 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 });
 
 builder.Services.AddDbContext<ApplicationContext>(options => options.UseSqlServer(Configuration.ConnectionString));
+
+builder.Services.AddTransient<TokenManager>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

@@ -22,6 +22,11 @@ namespace Web.Pages.MiCuenta.Lotes
 
         public async Task<ActionResult> OnGet()
         {
+            if (User.TokenIsReset())
+            {
+                return RedirectToPage("/MiCuenta/Clave/Reiniciar");
+            }
+
             try
             {
                 _httpClient.DefaultRequestHeaders.Authorization = new("Bearer", User.FindFirst(ClaimTypes.Authentication).Value);

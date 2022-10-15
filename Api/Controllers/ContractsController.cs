@@ -1,12 +1,14 @@
 ﻿using Infrastructure.Persistence;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace Api.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class ContractsController : ControllerBase
     {
         private readonly ApplicationContext _context;
@@ -18,8 +20,13 @@ namespace Api.Controllers
 
         [HttpGet]
         [Route("{contractId}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<ActionResult> Contract(int contractId)
         {
+            if (User.TokenIsReset())
+            {
+                return Unauthorized();
+            }
             var response = new Response<Contract>();
             try
             {
@@ -30,7 +37,7 @@ namespace Api.Controllers
 
                 if (contract == null)
                 {
-                    response.Message = "Ha ocurrido un error, intente nuevamente.";
+                    response.Message = ResponseMessage.AnErrorHasOccurred;
                     return Ok(response);
                 }
 
@@ -41,15 +48,21 @@ namespace Api.Controllers
             catch (Exception ex)
             {
                 var errorId = Configuration.LogError(ex.ToString());
-                response.Message = $"Ha ocurrido un error, intente nuevamente o reporte el error: {errorId}.";
+                response.Code = ResponseCode.BadRequest;
+                response.Message = ResponseMessage.AnErrorHasOccurredAndId(errorId);
                 return Ok(response);
             }
         }
 
         [HttpGet]
         [Route("{contractId}/[action]")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<ActionResult> Payments(int contractId)
         {
+            if (User.TokenIsReset())
+            {
+                return Unauthorized();
+            }
             var response = new Response<List<Payment>>();
             try
             {
@@ -66,8 +79,8 @@ namespace Api.Controllers
             catch (Exception ex)
             {
                 var errorId = Configuration.LogError(ex.ToString());
-                response.Code = -1;
-                response.Message = $"Ha ocurrido un error, intente nuevamente o reporte el error: {errorId}.";
+                response.Code = ResponseCode.BadRequest;
+                response.Message = ResponseMessage.AnErrorHasOccurredAndId(errorId);
                 return Ok(response);
             }
         }

@@ -2,8 +2,8 @@
 {
     public class Response<T>
     {
-        public int Code { get; set; } = -1;
-        public string? Message { get; set; } = null;
+        public ResponseCode Code { get; set; } = ResponseCode.BadRequest;
+        public string Message { get; set; } = ResponseMessage.AnErrorHasOccurred;
         public T? Data { get; set; } = default;
     }
 }

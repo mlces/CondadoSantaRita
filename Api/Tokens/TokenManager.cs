@@ -7,12 +7,6 @@ namespace Api.Tokens
 {
     public class TokenManager
     {
-        public enum TokenType
-        {
-            Login,
-            ResetPassword
-        }
-
         public TokenResponse<User> GenerateToken(User user, TokenType tokenType)
         {
             var claims = new List<Claim>
@@ -32,11 +26,11 @@ namespace Api.Tokens
             {
                 case TokenType.Login:
                     expires = expires.AddMinutes(Configuration.TokenValidityMinutesLogin);
-                    claims.Add(new(ClaimTypes.Version, nameof(TokenType.Login)));
+                    claims.Add(new(ClaimTypes.Version, TokenType.Login.ToString()));
                     break;
                 case TokenType.ResetPassword:
                     expires = expires.AddMinutes(Configuration.TokenValidityMinutesResetPassword);
-                    claims.Add(new(ClaimTypes.Version, nameof(TokenType.ResetPassword)));
+                    claims.Add(new(ClaimTypes.Version, TokenType.ResetPassword.ToString()));
                     break;
             }
 
@@ -50,6 +44,7 @@ namespace Api.Tokens
 
             return new TokenResponse<User>()
             {
+                TokenType = tokenType,
                 AccessToken = new JwtSecurityTokenHandler().WriteToken(token),
                 ExpiresIn = expires,
                 Data = user

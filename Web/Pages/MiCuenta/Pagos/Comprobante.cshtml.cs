@@ -1,4 +1,3 @@
-using Core.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Security.Claims;
@@ -19,13 +18,18 @@ namespace Web.Pages.MiCuenta.Pagos
 
         public async Task<ActionResult> OnGet()
         {
+            if (User.TokenIsReset())
+            {
+                return RedirectToPage("/MiCuenta/Clave/Reiniciar");
+            }
+
             try
             {
                 _httpClient.DefaultRequestHeaders.Authorization = new("Bearer", User.FindFirst(ClaimTypes.Authentication).Value);
 
                 var response = await _httpClient.GetFromJsonAsync<Response<PaymentReceipt>>($"PaymentReceipts/{id}");
 
-                if (response.Code != 0)
+                if (response.Code != ResponseCode.Ok)
                 {
                     return RedirectToPage("/Error");
                 }

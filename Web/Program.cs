@@ -1,6 +1,8 @@
 global using Core.Entities;
 global using Core.Models.Request;
 global using Core.Models.Response;
+global using System.Net;
+global using Web.Utilities;
 using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);

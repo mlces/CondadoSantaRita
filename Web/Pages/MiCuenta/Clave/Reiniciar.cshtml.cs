@@ -4,19 +4,19 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Security.Claims;
 
-namespace Web.Pages
+namespace Web.Pages.MiCuenta.Clave
 {
-    public class IngresarModel : PageModel
+    public class ReiniciarModel : PageModel
     {
         private readonly HttpClient _httpClient;
 
-        public IngresarModel(HttpClient httpClient)
+        public ReiniciarModel(HttpClient httpClient)
         {
             _httpClient = httpClient;
         }
 
         [BindProperty]
-        public TokenRequest Input { get; set; } = new();
+        public PasswordRequest Input { get; set; } = new();
 
         [TempData]
         public string Message { get; set; } = string.Empty;
@@ -26,7 +26,11 @@ namespace Web.Pages
             Message = string.Empty;
             if (User.Identity.IsAuthenticated)
             {
-                return User.TokenIsReset() ? RedirectToPage(Constants.PageReiniciar) : RedirectToPage(Constants.PageIndex);
+                if (!User.TokenIsReset())
+                {
+                    return RedirectToPage(Constants.PageSalir);
+                }
+                return Page();
             }
             return Page();
         }
@@ -40,7 +44,15 @@ namespace Web.Pages
 
             try
             {
-                var response = await _httpClient.PostAsJsonAsync("Users/RequestToken", Input);
+                _httpClient.DefaultRequestHeaders.Authorization = new("Bearer", User.FindFirst(ClaimTypes.Authentication).Value);
+
+                var response = await _httpClient.PostAsJsonAsync("Users/ResetPassword", Input);
+
+                if (response.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    Message = ResponseMessage.TimeLimitExceeded;
+                    return RedirectToPage(Constants.PageSalir);
+                }
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -50,7 +62,12 @@ namespace Web.Pages
 
                 var content = await response.Content.ReadFromJsonAsync<Response<TokenResponse<User>>>();
 
-                if (content.Code != ResponseCode.Ok && content.Code != ResponseCode.Conflict)
+                if (content.Code == ResponseCode.Unauthorized)
+                {
+                    return RedirectToPage(Constants.PageSalir);
+                }
+
+                if (content.Code != ResponseCode.Ok)
                 {
                     Message = content.Message;
                     return Page();
@@ -74,10 +91,6 @@ namespace Web.Pages
                 };
                 await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(appIdentity), authProperties);
 
-                if (content.Code == ResponseCode.Conflict)
-                {
-                    return RedirectToPage(Constants.PageReiniciar);
-                }
                 return RedirectToPage(Constants.PageIndex);
             }
             catch (Exception)

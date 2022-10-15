@@ -1,14 +1,17 @@
-﻿using Infrastructure.Persistence;
+﻿using Humanizer;
+using Infrastructure.Persistence;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Globalization;
-using Humanizer;
 using Microsoft.Reporting.NETCore;
+using System.Globalization;
 
 namespace Api.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class PaymentReceiptsController : ControllerBase
     {
         private readonly ApplicationContext _context;
@@ -22,6 +25,10 @@ namespace Api.Controllers
         [Route("{paymentId}")]
         public async Task<ActionResult> PaymentReceipt(int paymentId)
         {
+            if (User.TokenIsReset())
+            {
+                return Unauthorized();
+            }
             var response = new Response<PaymentReceipt>();
             try
             {
@@ -50,8 +57,8 @@ namespace Api.Controllers
             catch (Exception ex)
             {
                 var errorId = Configuration.LogError(ex.ToString());
-                response.Code = -1;
-                response.Message = $"Ha ocurrido un error, intente nuevamente o reporte el error: {errorId}.";
+                response.Code = ResponseCode.BadRequest;
+                response.Message = ResponseMessage.AnErrorHasOccurredAndId(errorId);
                 return Ok(response);
             }
         }

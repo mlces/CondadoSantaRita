@@ -1,6 +1,6 @@
-﻿using Humanizer;
+﻿using Api.Tokens;
+using Humanizer;
 using System.Security.Claims;
-using static Api.Tokens.TokenManager;
 
 namespace Api.Utilities
 {
@@ -28,13 +28,18 @@ namespace Api.Utilities
             return result.Humanize(LetterCasing.Sentence);
         }
 
-        public static bool TokenIsLogin(this ClaimsPrincipal user)
+        public static bool TokenIsReset(this ClaimsPrincipal user)
         {
-            var userTokenType = user.FindFirst(ClaimTypes.Version).Value.ToString();
-
-            if (userTokenType == nameof(TokenType.Login))
+            try
             {
-                return true;
+                var userTokenType = user.FindFirst(ClaimTypes.Version).Value.ToString();
+                if (userTokenType == TokenType.ResetPassword.ToString())
+                {
+                    return true;
+                }
+            }
+            catch (Exception)
+            {
             }
             return false;
         }
