@@ -49,7 +49,7 @@ namespace Web.Pages.MiCuenta.Clave
             {
                 _httpClient.DefaultRequestHeaders.Authorization = new("Bearer", User.FindFirst(ClaimTypes.Authentication).Value);
 
-                var response = await _httpClient.PostAsJsonAsync("Users/ResetPassword", Input);
+                var response = await _httpClient.PostAsJsonAsync("Token/Reset", Input);
 
                 if (response.StatusCode == HttpStatusCode.Unauthorized)
                 {
@@ -63,7 +63,7 @@ namespace Web.Pages.MiCuenta.Clave
                     return Page();
                 }
 
-                var content = await response.Content.ReadFromJsonAsync<Response<TokenResponse<User>>>();
+                var content = await response.Content.ReadFromJsonAsync<Response<Token>>();
 
                 if (content.Code == ResponseCode.Unauthorized)
                 {
@@ -78,11 +78,11 @@ namespace Web.Pages.MiCuenta.Clave
 
                 var claims = new List<Claim>()
                 {
-                    new(ClaimTypes.Actor, content.Data.Data.PersonId.ToString()),
-                    new(ClaimTypes.Authentication, content.Data.AccessToken),
+                    new(ClaimTypes.Actor, content.Data.PersonId.ToString()),
+                    new(ClaimTypes.Authentication, content.Data.Data),
                     new(ClaimTypes.Version, content.Data.TokenType.ToString())
                 };
-                foreach (var rol in content.Data.Data.Rols)
+                foreach (var rol in content.Data.Person.Rols)
                 {
                     claims.Add(new(ClaimTypes.Role, rol.Name));
                 }
@@ -90,7 +90,7 @@ namespace Web.Pages.MiCuenta.Clave
                 var appIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
                 var authProperties = new AuthenticationProperties()
                 {
-                    ExpiresUtc = content.Data.ExpiresIn
+                    ExpiresUtc = content.Data.Expires
                 };
                 await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(appIdentity), authProperties);
 

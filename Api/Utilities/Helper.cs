@@ -1,5 +1,6 @@
 ﻿using Api.Tokens;
 using Humanizer;
+using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
 
 namespace Api.Utilities
@@ -30,18 +31,47 @@ namespace Api.Utilities
 
         public static bool TokenIsReset(this ClaimsPrincipal user)
         {
-            try
+            return user.FindFirst(ClaimTypes.Version)?.Value == TokenType.Reset.Name;
+        }
+
+        public static Response<T> GenerateError<T>(this Response<T> response, Exception ex)
+        {
+            var errorId = Configuration.LogError(ex.ToString());
+            response.Code = ResponseCode.BadRequest;
+            response.Message = ResponseMessage.AnErrorHasOccurredAndId(errorId);
+            response.Data = default;
+            return response;
+        }
+
+        public static void RecoverClaims(this ClaimsPrincipal user, out int? personId, out string? rols, out Guid? tokenId, out TokenType? tokenType)
+        {
+            Claim? claim = user.FindFirst(ClaimTypes.Actor);
+            personId = claim != null ? int.Parse(claim.Value) : null;
+
+            claim = user.FindFirst(ClaimTypes.Role);
+            rols = claim?.Value;
+
+            claim = user.FindFirst(ClaimTypes.Sid);
+            tokenId = claim != null ? new(claim.Value) : null;
+
+            claim = user.FindFirst(ClaimTypes.Version);
+            if (claim?.Value == TokenType.Access.Name)
             {
-                var userTokenType = user.FindFirst(ClaimTypes.Version).Value.ToString();
-                if (userTokenType == TokenType.ResetPassword.ToString())
-                {
-                    return true;
-                }
+                tokenType = TokenType.Access;
             }
-            catch (Exception)
+            else if (claim?.Value == TokenType.Reset.Name)
             {
+                tokenType = TokenType.Reset;
             }
-            return false;
+            else if (claim?.Value == TokenType.Refresh.Name)
+            {
+                tokenType = TokenType.Refresh;
+            }
+            else
+            {
+                tokenType = null;
+            }
+
         }
     }
 }

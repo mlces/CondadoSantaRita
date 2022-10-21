@@ -8,7 +8,7 @@
 
         public int PayerId { get; set; }
 
-        public PaymentDetail[] PaymentDetails { get; set; } = new PaymentDetail[4];
+        public PaymentDetailRequest[] PaymentDetails { get; set; } = new PaymentDetailRequest[4];
 
     }
 }

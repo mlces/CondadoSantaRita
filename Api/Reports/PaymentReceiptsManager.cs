@@ -1,5 +1,6 @@
 ﻿using Microsoft.Reporting.NETCore;
 using System.Globalization;
+using PaymentDetail = Core.Entities.PaymentDetail;
 
 namespace Api.Reports
 {

@@ -6,6 +6,7 @@ namespace Core.Entities
     {
         public User()
         {
+            Tokens = new HashSet<Token>();
             Rols = new HashSet<Rol>();
         }
 
@@ -15,9 +16,10 @@ namespace Core.Entities
         public string PasswordHash { get; set; } = null!;
         public DateTime RegistrationDate { get; set; }
         public bool Disabled { get; set; }
-        public bool ResetPassword { get; set; }
+        public bool? ResetPassword { get; set; }
 
         public virtual Person Person { get; set; } = null!;
+        public virtual ICollection<Token> Tokens { get; set; }
 
         public virtual ICollection<Rol> Rols { get; set; }
     }

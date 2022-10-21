@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Core.Models.Request
 {
-    public class PaymentDetail
+    public class PaymentDetailRequest
     {
         public int PaymentMethodId { get; set; }
 

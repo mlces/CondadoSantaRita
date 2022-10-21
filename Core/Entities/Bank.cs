@@ -8,7 +8,7 @@
         }
 
         public int BankId { get; set; }
-        public string? Name { get; set; }
+        public string Name { get; set; } = null!;
 
         public virtual ICollection<PaymentDetail> PaymentDetails { get; set; }
     }

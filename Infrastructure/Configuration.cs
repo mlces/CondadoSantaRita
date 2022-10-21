@@ -22,8 +22,8 @@ namespace Infrastructure
         public static string TokenIssuer => Control.GetConfiguration<string>(nameof(TokenIssuer));
         public static string TokenAudience => Control.GetConfiguration<string>(nameof(TokenAudience));
         public static string ConnectionString => Control.GetConfiguration<string>(nameof(ConnectionString));
-        public static int TokenValidityMinutesLogin => Control.GetConfiguration<int>(nameof(TokenValidityMinutesLogin));
+        public static int TokenValidityMinutesAccess => Control.GetConfiguration<int>(nameof(TokenValidityMinutesAccess));
         public static bool Swagger => Control.GetConfiguration<bool>(nameof(Swagger));
-        public static int TokenValidityMinutesResetPassword => Control.GetConfiguration<int>(nameof(TokenValidityMinutesResetPassword));
+        public static int TokenValidityMinutesReset => Control.GetConfiguration<int>(nameof(TokenValidityMinutesReset));
     }
 }

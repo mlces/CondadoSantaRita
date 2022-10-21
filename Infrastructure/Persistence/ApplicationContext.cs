@@ -27,6 +27,8 @@ namespace Infrastructure.Persistence
         public virtual DbSet<Property> Properties { get; set; } = null!;
         public virtual DbSet<Rol> Rols { get; set; } = null!;
         public virtual DbSet<State> States { get; set; } = null!;
+        public virtual DbSet<Token> Tokens { get; set; } = null!;
+        public virtual DbSet<TokenType> TokenTypes { get; set; } = null!;
         public virtual DbSet<User> Users { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -345,6 +347,52 @@ namespace Infrastructure.Persistence
                     .IsUnicode(false);
             });
 
+            modelBuilder.Entity<Token>(entity =>
+            {
+                entity.ToTable("Token");
+
+                entity.Property(e => e.TokenId)
+                    .ValueGeneratedNever()
+                    .HasColumnName("TokenID");
+
+                entity.Property(e => e.Data).IsUnicode(false);
+
+                entity.Property(e => e.Expires).HasColumnType("datetime");
+
+                entity.Property(e => e.PersonId).HasColumnName("PersonID");
+
+                entity.Property(e => e.RegistrationDate)
+                    .HasColumnType("datetime")
+                    .HasDefaultValueSql("(getdate())");
+
+                entity.Property(e => e.TokenTypeId).HasColumnName("TokenTypeID");
+
+                entity.HasOne(d => d.Person)
+                    .WithMany(p => p.Tokens)
+                    .HasForeignKey(d => d.PersonId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_Token_User");
+
+                entity.HasOne(d => d.TokenType)
+                    .WithMany(p => p.Tokens)
+                    .HasForeignKey(d => d.TokenTypeId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_Token_TokenType");
+            });
+
+            modelBuilder.Entity<TokenType>(entity =>
+            {
+                entity.ToTable("TokenType");
+
+                entity.Property(e => e.TokenTypeId)
+                    .ValueGeneratedNever()
+                    .HasColumnName("TokenTypeID");
+
+                entity.Property(e => e.Name)
+                    .HasMaxLength(32)
+                    .IsUnicode(false);
+            });
+
             modelBuilder.Entity<User>(entity =>
             {
                 entity.HasKey(e => e.PersonId);
@@ -365,6 +413,10 @@ namespace Infrastructure.Persistence
                 entity.Property(e => e.RegistrationDate)
                     .HasColumnType("datetime")
                     .HasDefaultValueSql("(getdate())");
+
+                entity.Property(e => e.ResetPassword)
+                    .IsRequired()
+                    .HasDefaultValueSql("((1))");
 
                 entity.Property(e => e.Username)
                     .HasMaxLength(64)

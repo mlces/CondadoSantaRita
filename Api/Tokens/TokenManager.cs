@@ -7,11 +7,14 @@ namespace Api.Tokens
 {
     public class TokenManager
     {
-        public TokenResponse<User> GenerateToken(User user, TokenType tokenType)
+        public Token GenerateToken(User user, TokenType tokenType)
         {
+            var guid = Guid.NewGuid();
+
             var claims = new List<Claim>
             {
-                new(ClaimTypes.Actor, user.PersonId.ToString())
+                new(ClaimTypes.Actor, user.PersonId.ToString()),
+                new(ClaimTypes.Sid, guid.ToString()),
             };
             foreach (var rol in user.Rols)
             {
@@ -22,16 +25,15 @@ namespace Api.Tokens
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
             var expires = DateTime.Now;
 
-            switch (tokenType)
+            if (tokenType == TokenType.Access)
             {
-                case TokenType.Login:
-                    expires = expires.AddMinutes(Configuration.TokenValidityMinutesLogin);
-                    claims.Add(new(ClaimTypes.Version, TokenType.Login.ToString()));
-                    break;
-                case TokenType.ResetPassword:
-                    expires = expires.AddMinutes(Configuration.TokenValidityMinutesResetPassword);
-                    claims.Add(new(ClaimTypes.Version, TokenType.ResetPassword.ToString()));
-                    break;
+                expires = expires.AddMinutes(Configuration.TokenValidityMinutesAccess);
+                claims.Add(new(ClaimTypes.Version, TokenType.Access.Name));
+            }
+            else if (tokenType == TokenType.Reset)
+            {
+                expires = expires.AddMinutes(Configuration.TokenValidityMinutesReset);
+                claims.Add(new(ClaimTypes.Version, TokenType.Reset.Name));
             }
 
             JwtSecurityToken token = new(
@@ -42,12 +44,13 @@ namespace Api.Tokens
                 signingCredentials: creds
                 );
 
-            return new TokenResponse<User>()
+            return new Token()
             {
-                TokenType = tokenType,
-                AccessToken = new JwtSecurityTokenHandler().WriteToken(token),
-                ExpiresIn = expires,
-                Data = user
+                TokenId = guid,
+                TokenTypeId = tokenType.TokenTypeId,
+                Data = new JwtSecurityTokenHandler().WriteToken(token),
+                Expires = expires,
+                PersonId = user.PersonId
             };
         }
     }
