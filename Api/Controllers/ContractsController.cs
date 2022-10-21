@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
 
 namespace Api.Controllers
 {
@@ -20,14 +19,13 @@ namespace Api.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = "Administrador")]
-        [Route("Admin")]
-        public async Task<ActionResult> Contract()
+        [Authorize(Roles = nameof(Rol.Administrador))]
+        public async Task<ActionResult> Contracts()
         {
             var response = new Response<List<Contract>>();
             try
             {
-                if (User.TokenIsReset())
+                if (!User.TokenIsAccess())
                 {
                     response.Code = ResponseCode.Unauthorized;
                     response.Message = ResponseMessage.AnErrorHasOccurred;
@@ -46,10 +44,7 @@ namespace Api.Controllers
             }
             catch (Exception ex)
             {
-                var errorId = Configuration.LogError(ex.ToString());
-                response.Code = ResponseCode.BadRequest;
-                response.Message = ResponseMessage.AnErrorHasOccurredAndId(errorId);
-                return Ok(response);
+                return Ok(response.GenerateError(ex));
             }
         }
 
@@ -60,24 +55,35 @@ namespace Api.Controllers
             var response = new Response<Contract>();
             try
             {
-                if (User.TokenIsReset())
+                User.RecoverClaims(out int personIdToken, out string rols, out Guid tokenId);
+
+                if (!User.TokenIsAccess())
                 {
                     response.Code = ResponseCode.Unauthorized;
                     response.Message = ResponseMessage.AnErrorHasOccurred;
                     return Ok(response);
                 }
 
-                var personId = int.Parse(User.FindFirst(ClaimTypes.Actor).Value.ToString());
+                if (User.IsInRole(Rol.Administrador.Name))
+                {
+                    personIdToken = default;
+                }
 
                 var contract = await _context.Contracts
                     .Include(o => o.Property)
                     .Include(o => o.PaymentPlan)
-                    .Where(o => o.PersonId == personId)
-                    .FirstOrDefaultAsync(o => o.ContractId == contractId);
+                    .Where(o => o.PersonId == (personIdToken != default ? personIdToken : o.PersonId))
+                    .SingleOrDefaultAsync(o => o.ContractId == contractId);
 
                 if (contract == null)
                 {
-                    response.Message = ResponseMessage.AnErrorHasOccurred;
+                    if (!rols.Contains(Rol.Administrador.Name))
+                    {
+                        response.Message = ResponseMessage.AnErrorHasOccurred;
+                        return Ok(response);
+                    }
+                    response.Code = ResponseCode.NotFound;
+                    response.Message = ResponseMessage.ResourceNotFound;
                     return Ok(response);
                 }
 
@@ -87,49 +93,7 @@ namespace Api.Controllers
             }
             catch (Exception ex)
             {
-                var errorId = Configuration.LogError(ex.ToString());
-                response.Code = ResponseCode.BadRequest;
-                response.Message = ResponseMessage.AnErrorHasOccurredAndId(errorId);
-                return Ok(response);
-            }
-        }
-
-        [HttpGet]
-        [Route("{contractId}/Admin")]
-        [Authorize(Roles = "Administrador")]
-        public async Task<ActionResult> ContractAdmin(int contractId)
-        {
-            var response = new Response<Contract>();
-            try
-            {
-                if (User.TokenIsReset())
-                {
-                    response.Code = ResponseCode.Unauthorized;
-                    response.Message = ResponseMessage.AnErrorHasOccurred;
-                    return Ok(response);
-                }
-
-                var contract = await _context.Contracts
-                    .Include(o => o.Property)
-                    .Include(o => o.PaymentPlan)
-                    .FirstOrDefaultAsync(o => o.ContractId == contractId);
-
-                if (contract == null)
-                {
-                    response.Message = ResponseMessage.AnErrorHasOccurred;
-                    return Ok(response);
-                }
-
-                response.Code = ResponseCode.Ok;
-                response.Data = contract;
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                var errorId = Configuration.LogError(ex.ToString());
-                response.Code = ResponseCode.BadRequest;
-                response.Message = ResponseMessage.AnErrorHasOccurredAndId(errorId);
-                return Ok(response);
+                return Ok(response.GenerateError(ex));
             }
         }
 
@@ -140,20 +104,25 @@ namespace Api.Controllers
             var response = new Response<List<Payment>>();
             try
             {
-                if (User.TokenIsReset())
+                User.RecoverClaims(out int personIdToken, out string rols, out Guid tokenId);
+
+                if (!User.TokenIsAccess())
                 {
                     response.Code = ResponseCode.Unauthorized;
                     response.Message = ResponseMessage.AnErrorHasOccurred;
                     return Ok(response);
                 }
 
-                var personId = int.Parse(User.FindFirst(ClaimTypes.Actor).Value.ToString());
+                if (User.IsInRole(Rol.Administrador.Name))
+                {
+                    personIdToken = default;
+                }
 
                 var payments = await _context.Payments
                     .Include(o => o.Receiver)
                     .Include(o => o.Payer)
                     .Where(o => o.ContractId == contractId)
-                    .Where(o => o.Contract.PersonId == personId)
+                    .Where(o => o.Contract.PersonId == (personIdToken != default ? personIdToken : o.Contract.PersonId))
                     .ToListAsync();
 
                 response.Code = ResponseCode.Ok;
@@ -162,44 +131,7 @@ namespace Api.Controllers
             }
             catch (Exception ex)
             {
-                var errorId = Configuration.LogError(ex.ToString());
-                response.Code = ResponseCode.BadRequest;
-                response.Message = ResponseMessage.AnErrorHasOccurredAndId(errorId);
-                return Ok(response);
-            }
-        }
-
-        [HttpGet]
-        [Route("{contractId}/Payments/Admin")]
-        [Authorize(Roles = "Administrador")]
-        public async Task<ActionResult> PaymentsAdmin(int contractId)
-        {
-            var response = new Response<List<Payment>>();
-            try
-            {
-                if (User.TokenIsReset())
-                {
-                    response.Code = ResponseCode.Unauthorized;
-                    response.Message = ResponseMessage.AnErrorHasOccurred;
-                    return Ok(response);
-                }
-
-                var payments = await _context.Payments
-                    .Include(o => o.Receiver)
-                    .Include(o => o.Payer)
-                    .Where(o => o.ContractId == contractId)
-                    .ToListAsync();
-
-                response.Code = ResponseCode.Ok;
-                response.Data = payments;
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                var errorId = Configuration.LogError(ex.ToString());
-                response.Code = ResponseCode.BadRequest;
-                response.Message = ResponseMessage.AnErrorHasOccurredAndId(errorId);
-                return Ok(response);
+                return Ok(response.GenerateError(ex));
             }
         }
     }

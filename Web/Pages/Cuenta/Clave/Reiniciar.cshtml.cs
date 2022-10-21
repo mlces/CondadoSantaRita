@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Security.Claims;
 
-namespace Web.Pages.MiCuenta.Clave
+namespace Web.Pages.Cuenta.Clave
 {
     [Authorize]
     public class ReiniciarModel : PageModel

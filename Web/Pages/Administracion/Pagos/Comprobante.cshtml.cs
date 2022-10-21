@@ -29,7 +29,7 @@ namespace Web.Pages.Administracion.Pagos
             {
                 _httpClient.DefaultRequestHeaders.Authorization = new("Bearer", User.FindFirst(ClaimTypes.Authentication).Value);
 
-                var response = await _httpClient.GetAsync($"PaymentReceipts/{id}/Admin");
+                var response = await _httpClient.GetAsync($"PaymentReceipts/{id}");
 
                 if (response.StatusCode == HttpStatusCode.Unauthorized)
                 {

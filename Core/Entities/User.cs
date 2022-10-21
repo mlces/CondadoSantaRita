@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace Core.Entities
 {
@@ -12,6 +13,8 @@ namespace Core.Entities
 
         public int PersonId { get; set; }
         public string Username { get; set; } = null!;
+        [NotMapped]
+        public string Password { get; set; } = null!;
         [JsonIgnore]
         public string PasswordHash { get; set; } = null!;
         public DateTime RegistrationDate { get; set; }

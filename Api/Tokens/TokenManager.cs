@@ -25,12 +25,12 @@ namespace Api.Tokens
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
             var expires = DateTime.Now;
 
-            if (tokenType == TokenType.Access)
+            if (tokenType.Name == TokenType.Access.Name)
             {
                 expires = expires.AddMinutes(Configuration.TokenValidityMinutesAccess);
                 claims.Add(new(ClaimTypes.Version, TokenType.Access.Name));
             }
-            else if (tokenType == TokenType.Reset)
+            else if (tokenType.Name == TokenType.Reset.Name)
             {
                 expires = expires.AddMinutes(Configuration.TokenValidityMinutesReset);
                 claims.Add(new(ClaimTypes.Version, TokenType.Reset.Name));

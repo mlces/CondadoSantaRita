@@ -90,16 +90,16 @@ namespace Api.Controllers
             }
         }
 
-        [HttpPost]
+        [HttpPut]
         [Route("[action]")]
         public async Task<ActionResult> Reset(PasswordRequest request)
         {
             var response = new Response<Token>();
             try
             {
-                User.RecoverClaims(out int? personId, out string? rols, out Guid? tokenId, out TokenType? tokenType);
+                User.RecoverClaims(out int personIdToken, out string rols, out Guid tokenId);
 
-                if (tokenType != TokenType.Reset)
+                if (!User.TokenIsAccess())
                 {
                     response.Code = ResponseCode.Unauthorized;
                     response.Message = ResponseMessage.AnErrorHasOccurred;
@@ -108,7 +108,7 @@ namespace Api.Controllers
 
                 var user = await _context.Users
                     .Include(o => o.Rols)
-                    .FirstOrDefaultAsync(o => o.PersonId == personId);
+                    .FirstOrDefaultAsync(o => o.PersonId == personIdToken);
 
                 if (user == null)
                 {

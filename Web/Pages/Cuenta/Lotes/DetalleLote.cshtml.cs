@@ -3,19 +3,24 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Security.Claims;
 
-namespace Web.Pages.MiCuenta
+namespace Web.Pages.Cuenta.Lotes
 {
     [Authorize]
-    public class PerfilModel : PageModel
+    public class DetalleLoteModel : PageModel
     {
         private readonly HttpClient _httpClient;
 
-        public PerfilModel(HttpClient httpClient)
+        public DetalleLoteModel(HttpClient httpClient)
         {
             _httpClient = httpClient;
         }
 
-        public Person Person { get; set; } = new();
+        [FromQuery]
+        public int id { get; set; }
+
+        public Contract Contract { get; set; } = new();
+
+        public List<Payment> Payments { get; set; } = new();
 
         public async Task<ActionResult> OnGet()
         {
@@ -28,7 +33,7 @@ namespace Web.Pages.MiCuenta
             {
                 _httpClient.DefaultRequestHeaders.Authorization = new("Bearer", User.FindFirst(ClaimTypes.Authentication).Value);
 
-                var response = await _httpClient.GetAsync("People");
+                var response = await _httpClient.GetAsync($"Contracts/{id}");
 
                 if (response.StatusCode == HttpStatusCode.Unauthorized)
                 {
@@ -40,7 +45,7 @@ namespace Web.Pages.MiCuenta
                     return RedirectToPage(Constants.PageError);
                 }
 
-                var content = await response.Content.ReadFromJsonAsync<Response<Person>>();
+                var content = await response.Content.ReadFromJsonAsync<Response<Contract>>();
 
                 if (content.Code == ResponseCode.Unauthorized)
                 {
@@ -52,7 +57,32 @@ namespace Web.Pages.MiCuenta
                     return RedirectToPage(Constants.PageError);
                 }
 
-                Person = content.Data;
+                var response2 = await _httpClient.GetAsync($"Contracts/{id}/Payments");
+
+                if (response2.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    return RedirectToPage(Constants.PageSalir);
+                }
+
+                if (!response2.IsSuccessStatusCode)
+                {
+                    return RedirectToPage(Constants.PageError);
+                }
+
+                var content2 = await response2.Content.ReadFromJsonAsync<Response<List<Payment>>>();
+
+                if (content2.Code == ResponseCode.Unauthorized)
+                {
+                    return RedirectToPage(Constants.PageReiniciar);
+                }
+
+                if (content2.Code != ResponseCode.Ok)
+                {
+                    return RedirectToPage(Constants.PageError);
+                }
+
+                Contract = content.Data;
+                Payments = content2.Data;
                 return Page();
             }
             catch (Exception)

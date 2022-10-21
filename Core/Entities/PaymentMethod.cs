@@ -16,10 +16,5 @@
         public static PaymentMethod Transferencia => new() { PaymentMethodId = 2, Name = nameof(Transferencia) };
         public static PaymentMethod Cheque => new() { PaymentMethodId = 3, Name = nameof(Cheque) };
         public static PaymentMethod Deposito => new() { PaymentMethodId = 3, Name = nameof(Deposito) };
-
-        public override string ToString()
-        {
-            return Name;
-        }
     }
 }

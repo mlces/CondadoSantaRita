@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace Web.Pages.MiCuenta
+namespace Web.Pages.Cuenta
 {
     public class SalirModel : PageModel
     {

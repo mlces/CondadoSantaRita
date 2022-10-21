@@ -60,7 +60,7 @@ namespace Web.Pages
                 {
                     new(ClaimTypes.Actor, content.Data.PersonId.ToString()),
                     new(ClaimTypes.Authentication, content.Data.Data),
-                    new(ClaimTypes.Version, content.Data.TokenType.ToString())
+                    new(ClaimTypes.Version, content.Data.TokenType.Name)
                 };
                 foreach (var rol in content.Data.Person.Rols)
                 {

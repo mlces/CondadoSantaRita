@@ -14,34 +14,25 @@ namespace Web.Utilities
             return user.FindFirst(ClaimTypes.Version)?.Value == TokenType.Reset.Name;
         }
 
-        public static void RecoverClaims(this ClaimsPrincipal user, out int? personId, out string? rols, out Guid? tokenId, out TokenType? tokenType)
+        public static bool TokenIsAccess(this ClaimsPrincipal user)
+        {
+            return user.FindFirst(ClaimTypes.Version)?.Value == TokenType.Access.Name;
+        }
+
+        public static void RecoverClaims(this ClaimsPrincipal user, out int personId, out string rols, out Guid tokenId)
         {
             Claim? claim = user.FindFirst(ClaimTypes.Actor);
-            personId = claim != null ? int.Parse(claim.Value) : null;
+            personId = claim != null ? int.Parse(claim.Value) : default;
 
-            claim = user.FindFirst(ClaimTypes.Role);
-            rols = claim?.Value;
+            var claims = user.Claims.Where(o => o.Type == ClaimTypes.Role).ToList();
+            rols = string.Empty;
+            foreach (var item in claims)
+            {
+                rols += item.Value;
+            }
 
             claim = user.FindFirst(ClaimTypes.Sid);
-            tokenId = claim != null ? new(claim.Value) : null;
-
-            claim = user.FindFirst(ClaimTypes.Version);
-            if (claim?.Value == TokenType.Access.Name)
-            {
-                tokenType = TokenType.Access;
-            }
-            else if (claim?.Value == TokenType.Reset.Name)
-            {
-                tokenType = TokenType.Reset;
-            }
-            else if (claim?.Value == TokenType.Refresh.Name)
-            {
-                tokenType = TokenType.Refresh;
-            }
-            else
-            {
-                tokenType = null;
-            }
+            tokenId = claim != null ? new(claim.Value) : default;
         }
     }
 }

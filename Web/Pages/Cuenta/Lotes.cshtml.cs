@@ -3,20 +3,18 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Security.Claims;
 
-namespace Web.Pages.MiCuenta.Pagos
+namespace Web.Pages.Cuenta
 {
     [Authorize]
-    public class ComprobanteModel : PageModel
+    public class LotesModel : PageModel
     {
         private readonly HttpClient _httpClient;
 
-        public ComprobanteModel(HttpClient httpClient)
+        public LotesModel(HttpClient httpClient)
         {
             _httpClient = httpClient;
         }
-
-        [FromQuery]
-        public int id { get; set; }
+        public List<Contract> Contracts { get; set; } = new();
 
         public async Task<ActionResult> OnGet()
         {
@@ -29,7 +27,9 @@ namespace Web.Pages.MiCuenta.Pagos
             {
                 _httpClient.DefaultRequestHeaders.Authorization = new("Bearer", User.FindFirst(ClaimTypes.Authentication).Value);
 
-                var response = await _httpClient.GetAsync($"PaymentReceipts/{id}");
+                var personId = User.FindFirst(ClaimTypes.Actor).Value;
+
+                var response = await _httpClient.GetAsync($"People/{personId}/Contracts");
 
                 if (response.StatusCode == HttpStatusCode.Unauthorized)
                 {
@@ -41,7 +41,7 @@ namespace Web.Pages.MiCuenta.Pagos
                     return RedirectToPage(Constants.PageError);
                 }
 
-                var content = await response.Content.ReadFromJsonAsync<Response<PaymentReceipt>>();
+                var content = await response.Content.ReadFromJsonAsync<Response<List<Contract>>>();
 
                 if (content.Code == ResponseCode.Unauthorized)
                 {
@@ -53,7 +53,8 @@ namespace Web.Pages.MiCuenta.Pagos
                     return RedirectToPage(Constants.PageError);
                 }
 
-                return File(content.Data.Data, "application/pdf");
+                Contracts = content.Data;
+                return Page();
             }
             catch (Exception)
             {

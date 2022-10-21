@@ -33,7 +33,7 @@ namespace Web.Pages.Administracion.Lotes
             {
                 _httpClient.DefaultRequestHeaders.Authorization = new("Bearer", User.FindFirst(ClaimTypes.Authentication).Value);
 
-                var response = await _httpClient.GetAsync($"Contracts/{id}/Admin");
+                var response = await _httpClient.GetAsync($"Contracts/{id}");
 
                 if (response.StatusCode == HttpStatusCode.Unauthorized)
                 {
@@ -57,7 +57,7 @@ namespace Web.Pages.Administracion.Lotes
                     return RedirectToPage(Constants.PageError);
                 }
 
-                var response2 = await _httpClient.GetAsync($"Contracts/{id}/Payments/Admin");
+                var response2 = await _httpClient.GetAsync($"Contracts/{id}/Payments");
 
                 if (response2.StatusCode == HttpStatusCode.Unauthorized)
                 {

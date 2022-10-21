@@ -27,7 +27,7 @@ namespace Web.Pages.Administracion
             {
                 _httpClient.DefaultRequestHeaders.Authorization = new("Bearer", User.FindFirst(ClaimTypes.Authentication).Value);
 
-                var response = await _httpClient.GetAsync("Contracts/Admin");
+                var response = await _httpClient.GetAsync("Contracts");
 
                 if (response.StatusCode == HttpStatusCode.Unauthorized)
                 {
