@@ -99,7 +99,7 @@ namespace Api.Controllers
             {
                 User.RecoverClaims(out int personIdToken, out Guid tokenId);
 
-                if (!User.TokenIsAccess())
+                if (!User.TokenIsReset())
                 {
                     response.Code = ResponseCode.Unauthorized;
                     response.Message = ResponseMessage.AnErrorHasOccurred;

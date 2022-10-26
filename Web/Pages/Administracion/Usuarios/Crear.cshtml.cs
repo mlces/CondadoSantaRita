@@ -1,20 +1,22 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using System.Net.Http;
 using System.Security.Claims;
 
-namespace Web.Pages.Administracion
+namespace Web.Pages.Administracion.Usuarios
 {
-    public class PersonasModel : PageModel
+    public class CrearModel : PageModel
     {
         private readonly HttpClient _httpClient;
 
-        public PersonasModel(HttpClient httpClient)
+        public CrearModel(HttpClient httpClient)
         {
             _httpClient = httpClient;
         }
 
-        public List<Person> People { get; set; } = new();
+        public User user { get; set; }
+
+        [FromQuery]
+        public int id { get; set; }
 
         public async Task<ActionResult> OnGet()
         {
@@ -27,7 +29,7 @@ namespace Web.Pages.Administracion
             {
                 _httpClient.DefaultRequestHeaders.Authorization = new("Bearer", User.FindFirst(ClaimTypes.Authentication).Value);
 
-                var response = await _httpClient.GetAsync("People");
+                var response = await _httpClient.GetAsync($"Users/{id}");
 
                 if (response.StatusCode == HttpStatusCode.Unauthorized)
                 {
@@ -39,7 +41,7 @@ namespace Web.Pages.Administracion
                     return RedirectToPage(Constants.PageError);
                 }
 
-                var content = await response.Content.ReadFromJsonAsync<Response<List<Person>>>();
+                var content = await response.Content.ReadFromJsonAsync<Response<User>>();
 
                 if (content.Code == ResponseCode.Unauthorized)
                 {
@@ -51,7 +53,7 @@ namespace Web.Pages.Administracion
                     return RedirectToPage(Constants.PageError);
                 }
 
-                People = content.Data;
+                user = content.Data;
                 return Page();
             }
             catch (Exception)

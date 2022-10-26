@@ -1,7 +1,7 @@
 ﻿@page
-@model PerfilModel
+@model DetallePersonaModel
 @{
-    ViewData["Title"] = "Perfil";
+    ViewData["Title"] = "Detalle Persona";
 }
 
 <div class="mb-5 mt-5">
@@ -55,6 +55,12 @@
                     <label class="form-label">Municipio</label>
                     <input type="text" class="form-control" readonly="" value="@Model.Person.Address.City.Name">
                 </div>
+                @if (Model.Person.User == null)
+                {
+                    <div class="col-12 col-md-6 d-lg-flex align-items-lg-end mt-5">
+                        <a class="btn btn-warning form-control" role="button" asp-page="/Administracion/Usuarios/Crear" asp-route-id="@Model.Person.PersonId">Crear Usuario</a>
+                    </div>
+                }
             </div>
         </div>
     </div>

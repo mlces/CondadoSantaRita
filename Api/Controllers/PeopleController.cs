@@ -68,6 +68,7 @@ namespace Api.Controllers
 
                 var person = await _context.People
                     .Include(o => o.Address.City.State)
+                    .Include(o => o.User)
                     .SingleOrDefaultAsync(o => o.PersonId == personId);
 
                 if (person == null)

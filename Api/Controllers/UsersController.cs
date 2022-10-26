@@ -21,7 +21,7 @@ namespace Api.Controllers
             _context.Rols.Attach(Rol.Administrador);
         }
 
-        [HttpPost]
+        [HttpGet]
         [Route("{personId}")]
         [Authorize(Roles = nameof(Rol.Administrador))]
         public async Task<ActionResult> Create(int personId)
@@ -72,7 +72,7 @@ namespace Api.Controllers
             }
         }
 
-        [HttpPost]
+        [HttpGet]
         [Route("{personId}/[action]")]
         [Authorize(Roles = nameof(Rol.Administrador))]
         public async Task<ActionResult> Reset(int personId)

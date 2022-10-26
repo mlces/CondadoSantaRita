@@ -21,8 +21,8 @@
                         @foreach (var item in Model.Contracts)
                         {
                             <tr>
-                                <td id="code">@item.Property.Code</td>
-                                <td id="client">@string.Format("{0} {1}", item.Person.FirstName, item.Person.LastName)</td>
+                                <td>@item.Property.Code</td>
+                                <td>@string.Format("{0} {1}", item.Person.FirstName, item.Person.LastName)</td>
                                 <td>@item.BalancePayable.ToCurrency()</td>
                                 <td>
                                     <a class="btn btn-warning" asp-page="/Administracion/Lotes/DetalleLote" asp-route-id="@item.ContractId">
