@@ -52,7 +52,7 @@ namespace Api.Controllers
             var response = new Response<Person>();
             try
             {
-                User.RecoverClaims(out int personIdToken, out string rols, out Guid tokenId);
+                User.RecoverClaims(out int personIdToken, out Guid tokenId);
 
                 if (!User.TokenIsAccess())
                 {
@@ -61,7 +61,7 @@ namespace Api.Controllers
                     return Ok(response);
                 }
 
-                if (!rols.Contains(Rol.Administrador.Name))
+                if (!User.IsInRole(Rol.Administrador.Name))
                 {
                     personId = personIdToken;
                 }
@@ -72,7 +72,7 @@ namespace Api.Controllers
 
                 if (person == null)
                 {
-                    if (!rols.Contains(Rol.Administrador.Name))
+                    if (!User.IsInRole(Rol.Administrador.Name))
                     {
                         response.Message = ResponseMessage.AnErrorHasOccurred;
                         return Ok(response);
@@ -99,7 +99,7 @@ namespace Api.Controllers
             var response = new Response<List<Contract>>();
             try
             {
-                User.RecoverClaims(out int personIdToken, out string rols, out Guid tokenId);
+                User.RecoverClaims(out int personIdToken, out Guid tokenId);
 
                 if (!User.TokenIsAccess())
                 {
@@ -108,7 +108,7 @@ namespace Api.Controllers
                     return Ok(response);
                 }
 
-                if (!rols.Contains(Rol.Administrador.Name))
+                if (!User.IsInRole(Rol.Administrador.Name))
                 {
                     personId = personIdToken;
                 }

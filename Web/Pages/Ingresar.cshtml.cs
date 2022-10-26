@@ -40,7 +40,7 @@ namespace Web.Pages
 
             try
             {
-                var response = await _httpClient.PostAsJsonAsync("Token", Input);
+                var response = await _httpClient.PostAsJsonAsync("Tokens", Input);
 
                 if (!response.IsSuccessStatusCode)
                 {

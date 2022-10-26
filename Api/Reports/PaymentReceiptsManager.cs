@@ -1,6 +1,5 @@
 ﻿using Microsoft.Reporting.NETCore;
 using System.Globalization;
-using PaymentDetail = Core.Entities.PaymentDetail;
 
 namespace Api.Reports
 {
@@ -20,8 +19,9 @@ namespace Api.Reports
                 new ("numero_recibo", payment.PaymentId.ToString()),
                 new ("nombre_cliente", $"{payment.Payer.FirstName} {payment.Payer.LastName}"),
                 new ("abono_letras", payment.TotalAmount.ToWords()),
-                new ("concepto", payment.Description),
-                new ("fecha_pago", DateTime.Now.ToString("f", CultureInfo.GetCultureInfo("es-Es"))),
+                new ("concepto", $"Abono a cuenta del lote {payment.Contract.Property.Code}"),
+                new ("cuota_mes", $"Pago de cuota No. {payment.PaymentNumber}, mes de {payment.Contract.RegistrationDate.AddMonths(payment.PaymentNumber).ToString("MMMM de yyyy", CultureInfo.GetCultureInfo("es-Es"))}"),
+                new ("fecha_pago", payment.RegistrationDate.ToString("f", CultureInfo.GetCultureInfo("es-Es"))),
                 new ("abono_numeros", payment.TotalAmount.ToCurrency()),
                 new ("saldo_anterior", payment.PreviousBalancePayable.ToCurrency()),
                 new ("saldo_actual", payment.NewBalancePayable.ToCurrency())

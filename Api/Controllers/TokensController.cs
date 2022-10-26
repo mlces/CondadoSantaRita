@@ -11,16 +11,18 @@ namespace Api.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public class TokenController : ControllerBase
+    public class TokensController : ControllerBase
     {
         private readonly ApplicationContext _context;
 
         private readonly TokenManager _tokenManager;
 
-        public TokenController(ApplicationContext context, TokenManager tokenManager)
+        public TokensController(ApplicationContext context, TokenManager tokenManager)
         {
             _context = context;
             _tokenManager = tokenManager;
+            _context.TokenTypes.Attach(TokenType.Access);
+            _context.TokenTypes.Attach(TokenType.Reset);
         }
 
         [HttpPost]
@@ -56,7 +58,6 @@ namespace Api.Controllers
 
                         await _context.Tokens.AddAsync(response.Data);
                         await _context.SaveChangesAsync();
-                        await _context.Entry(response.Data).Reference(o => o.TokenType).LoadAsync();
                         return Ok(response);
                     }
                     else
@@ -80,7 +81,6 @@ namespace Api.Controllers
 
                     await _context.Tokens.AddAsync(response.Data);
                     await _context.SaveChangesAsync();
-                    await _context.Entry(response.Data).Reference(o => o.TokenType).LoadAsync();
                     return Ok(response);
                 }
             }
@@ -90,14 +90,14 @@ namespace Api.Controllers
             }
         }
 
-        [HttpPut]
+        [HttpPost]
         [Route("[action]")]
         public async Task<ActionResult> Reset(PasswordRequest request)
         {
             var response = new Response<Token>();
             try
             {
-                User.RecoverClaims(out int personIdToken, out string rols, out Guid tokenId);
+                User.RecoverClaims(out int personIdToken, out Guid tokenId);
 
                 if (!User.TokenIsAccess())
                 {
@@ -136,7 +136,6 @@ namespace Api.Controllers
 
                 await _context.Tokens.AddAsync(response.Data);
                 await _context.SaveChangesAsync();
-                await _context.Entry(response.Data).Reference(o => o.TokenType).LoadAsync();
                 return Ok(response);
             }
             catch (Exception ex)

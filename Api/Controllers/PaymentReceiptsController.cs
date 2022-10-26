@@ -29,7 +29,7 @@ namespace Api.Controllers
             var response = new Response<PaymentReceipt>();
             try
             {
-                User.RecoverClaims(out int personIdToken, out string rols, out Guid tokenId);
+                User.RecoverClaims(out int personIdToken, out Guid tokenId);
 
                 if (!User.TokenIsAccess())
                 {
@@ -54,6 +54,7 @@ namespace Api.Controllers
                         .Include(o => o.Payer)
                         .Include(o => o.Receiver)
                         .Include(o => o.Contract)
+                        .ThenInclude(o => o.Property)
                         .Where(o => o.Contract.PersonId == (personIdToken != default ? personIdToken : o.Contract.PersonId))
                         .SingleOrDefaultAsync(o => o.PaymentId == paymentId);
 

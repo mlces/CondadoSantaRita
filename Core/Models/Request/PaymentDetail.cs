@@ -1,13 +1,17 @@
-﻿namespace Core.Models.Request
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Core.Models.Request
 {
     public class PaymentDetailRequest
     {
         public int PaymentMethodId { get; set; }
 
-        public int BankId { get; set; }
+        [Range(0, 10)]
+        public int BankId { get; set; } = 0;
 
-        public string ReferenceNumber { get; set; }
+        public string? ReferenceNumber { get; set; }
 
-        public decimal Amount { get; set; }
+        [Range(0, 10000)]
+        public decimal Amount { get; set; } = 0;
     }
 }

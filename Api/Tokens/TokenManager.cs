@@ -47,7 +47,7 @@ namespace Api.Tokens
             return new Token()
             {
                 TokenId = guid,
-                TokenTypeId = tokenType.TokenTypeId,
+                TokenType = tokenType,
                 Data = new JwtSecurityTokenHandler().WriteToken(token),
                 Expires = expires,
                 PersonId = user.PersonId

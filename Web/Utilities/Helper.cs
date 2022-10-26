@@ -19,17 +19,10 @@ namespace Web.Utilities
             return user.FindFirst(ClaimTypes.Version)?.Value == TokenType.Access.Name;
         }
 
-        public static void RecoverClaims(this ClaimsPrincipal user, out int personId, out string rols, out Guid tokenId)
+        public static void RecoverClaims(this ClaimsPrincipal user, out int personId, out Guid tokenId)
         {
             Claim? claim = user.FindFirst(ClaimTypes.Actor);
             personId = claim != null ? int.Parse(claim.Value) : default;
-
-            var claims = user.Claims.Where(o => o.Type == ClaimTypes.Role).ToList();
-            rols = string.Empty;
-            foreach (var item in claims)
-            {
-                rols += item.Value;
-            }
 
             claim = user.FindFirst(ClaimTypes.Sid);
             tokenId = claim != null ? new(claim.Value) : default;

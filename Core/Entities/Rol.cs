@@ -12,7 +12,7 @@
 
         public virtual ICollection<User> People { get; set; }
 
-        public static Rol Administrador => new() { RolId = 1, Name = nameof(Administrador) };
-        public static Rol Cliente => new() { RolId = 2, Name = nameof(Cliente) };
+        public static Rol Administrador { get; private set; } = new() { RolId = 1, Name = nameof(Administrador) };
+        public static Rol Cliente { get; private set; } = new() { RolId = 2, Name = nameof(Cliente) };
     }
 }

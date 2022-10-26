@@ -32,6 +32,13 @@
                     <label class="form-label">Fecha de compra</label>
                     <input type="text" class="form-control" readonly="" value="@Model.Contract.RegistrationDate">
                 </div>
+                <div class="col-12 col-md-6 mt-3">
+                    <label class="form-label">Cliente</label>
+                    <input type="text" class="form-control" readonly="" value="@string.Format("{0} {1}", Model.Contract.Person.FirstName, Model.Contract.Person.LastName)">
+                </div>
+                <div class="col-12 col-md-6 d-lg-flex align-items-lg-end mt-3">
+                    <a asp-page="/Administracion/Pagos/Agregar" asp-route-id="@Model.Contract.ContractId" class="btn btn-warning form-control" type="button">Registrar Pago</a>
+                </div>
             </div>
         </div>
         <div class="mt-5" style="background: var(--bs-gray-100);">

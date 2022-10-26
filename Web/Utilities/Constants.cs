@@ -7,5 +7,6 @@
         public static readonly string PageReiniciar = "/Cuenta/Clave/Reiniciar";
         public static readonly string PageIndex = "/Index";
         public static readonly string PageSalir = "/Cuenta/Salir";
+        public static readonly string PageAdminComprobante = "/Administracion/Pagos/Comprobante";
     }
 }

@@ -12,7 +12,7 @@
 
         public virtual ICollection<Token> Tokens { get; set; }
 
-        public static TokenType Access => new() { TokenTypeId = 1, Name = nameof(Access) };
-        public static TokenType Reset => new() { TokenTypeId = 2, Name = nameof(Reset) };
+        public static TokenType Access { get; private set; } = new() { TokenTypeId = 1, Name = nameof(Access) };
+        public static TokenType Reset { get; private set; } = new() { TokenTypeId = 2, Name = nameof(Reset) };
     }
 }

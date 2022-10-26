@@ -49,7 +49,7 @@ namespace Web.Pages.Cuenta.Clave
             {
                 _httpClient.DefaultRequestHeaders.Authorization = new("Bearer", User.FindFirst(ClaimTypes.Authentication).Value);
 
-                var response = await _httpClient.PostAsJsonAsync("Token/Reset", Input);
+                var response = await _httpClient.PostAsJsonAsync("Tokens/Reset", Input);
 
                 if (response.StatusCode == HttpStatusCode.Unauthorized)
                 {

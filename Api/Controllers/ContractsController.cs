@@ -55,7 +55,7 @@ namespace Api.Controllers
             var response = new Response<Contract>();
             try
             {
-                User.RecoverClaims(out int personIdToken, out string rols, out Guid tokenId);
+                User.RecoverClaims(out int personIdToken, out Guid tokenId);
 
                 if (!User.TokenIsAccess())
                 {
@@ -72,12 +72,13 @@ namespace Api.Controllers
                 var contract = await _context.Contracts
                     .Include(o => o.Property)
                     .Include(o => o.PaymentPlan)
+                    .Include(o => o.Person)
                     .Where(o => o.PersonId == (personIdToken != default ? personIdToken : o.PersonId))
                     .SingleOrDefaultAsync(o => o.ContractId == contractId);
 
                 if (contract == null)
                 {
-                    if (!rols.Contains(Rol.Administrador.Name))
+                    if (!User.IsInRole(Rol.Administrador.Name))
                     {
                         response.Message = ResponseMessage.AnErrorHasOccurred;
                         return Ok(response);
@@ -104,7 +105,7 @@ namespace Api.Controllers
             var response = new Response<List<Payment>>();
             try
             {
-                User.RecoverClaims(out int personIdToken, out string rols, out Guid tokenId);
+                User.RecoverClaims(out int personIdToken, out Guid tokenId);
 
                 if (!User.TokenIsAccess())
                 {

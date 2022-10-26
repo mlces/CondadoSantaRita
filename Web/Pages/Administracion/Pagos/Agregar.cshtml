@@ -3,78 +3,79 @@
 @{
 }
 
-<div class="mt-5 mb-5">
-    <div class="container">
-        <div class="p-4 shadow-lg" style="background: var(--bs-gray-100);">
-            <div class="row">
-                <div class="col-12 col-md-6 mt-3"><label class="form-label">Código de lote</label><input type="text" class="form-control" readonly=""></div>
-                <div class="col-12 col-md-6 mt-3"><label class="form-label">Cliente</label><input type="text" class="form-control" readonly=""></div>
-                <div class="col-12 mt-3"><label class="form-label">Concepto</label><textarea class="form-control"></textarea></div>
+<form method="post">
+    <div class="mt-5 mb-5">
+        <div class="container">
+            <div class="p-4 shadow-lg" style="background: var(--bs-gray-100);">
+                <div class="row">
+                    <input asp-for="@Model.Input.ContractId" type="hidden" class="form-control" readonly="">
+                    <input asp-for="@Model.Input.PayerId" type="hidden" class="form-control" readonly="">
+                    <div class="col-12 col-md-6 mt-3">
+                        <label class="form-label">Código de lote</label>
+                        <input value="@Model.Code" type="text" class="form-control" readonly="">
+                    </div>
+                    <div class="col-12 col-md-6 mt-3">
+                        <label class="form-label">Cliente</label>
+                        <input value="@Model.Client" type="text" class="form-control" readonly="">
+                    </div>
+                    <div class="col-12 col-md-6 mt-3">
+                        <label class="form-label">Saldo</label>
+                        <input value="@Model.BalancePaid" type="text" class="form-control" readonly="">
+                    </div>
+                    <div class="col-12 col-md-6 mt-3">
+                        <label class="form-label">Acumulado</label>
+                        <input value="@Model.BalancePayable" type="text" class="form-control" readonly="">
+                    </div>
+                    <div class="col-12 mt-3">
+                        <label class="form-label">Concepto</label>
+                        <textarea asp-for="@Model.Input.Description" class="form-control"></textarea>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-</div>
-<div class="mt-5 mb-5">
-    <div class="container">
-        <div class="p-4 shadow-lg mb-3" style="background: var(--bs-gray-100);">
-            <div class="row">
-                <div class="col-12 col-md-3 mt-3"><label class="form-label">Detalle</label><input type="text" class="form-control" readonly="" value="Efectivo"></div>
-                <div class="col-12 col-md-3 mt-3"><label class="form-label">Cantidad</label><input type="number" class="form-control"></div>
-            </div>
-        </div>
-        <div class="p-4 shadow-lg mb-3" style="background: var(--bs-gray-100);">
-            <div class="row">
-                <div class="col-12 col-md-3 mt-3"><label class="form-label">Detalle</label><input type="text" class="form-control" readonly="" value="Transferencia"></div>
-                <div class="col-12 col-md-3 mt-3"><label class="form-label">Cantidad</label><input type="number" class="form-control"></div>
-                <div class="col-12 col-md-3 mt-3">
-                    <label class="form-label">Banco</label><select class="form-control">
-                        <optgroup label="Escoge un banco">
-                            <option value="" selected=""></option>
-                            <option value="12">BAM</option>
-                            <option value="13">BAC</option>
-                            <option value="14">GYT</option>
-                        </optgroup>
-                    </select>
+    <div class="mt-5 mb-5">
+        <div class="container">
+            @for (int i = 0; i < Model.Input.PaymentDetails.Length; i++)
+            {
+                <div class="p-4 shadow-lg mb-3" style="background: var(--bs-gray-100);">
+                    <div class="row">
+                        <div class="col-12 col-md-3 mt-3">
+                            <label class="form-label">Detalle</label>
+                            <select asp-for="@Model.Input.PaymentDetails[i].PaymentMethodId" class="form-control" asp-items="@Model.PaymentMethods" disabled>
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-3 mt-3">
+                            <label class="form-label">Cantidad</label>
+                            <input asp-for="@Model.Input.PaymentDetails[i].Amount" type="number" class="form-control">
+                        </div>
+                        @if (@Model.Input.PaymentDetails[i].PaymentMethodId != PaymentMethod.Efectivo.PaymentMethodId)
+                        {
+                            <div class="col-12 col-md-3 mt-3">
+                                <label class="form-label">Banco</label>
+                                <select asp-for="@Model.Input.PaymentDetails[i].BankId" class="form-control" asp-items="@Model.Banks">
+                                    <option value="0" selected>Escoge un banco</option>
+                                </select>
+                            </div>
+                            <div class="col-12 col-md-3 mt-3">
+                                <label class="form-label">Referencia</label>
+                                <input asp-for="@Model.Input.PaymentDetails[i].ReferenceNumber" type="text" class="form-control">
+                            </div>
+                        }
+                    </div>
                 </div>
-                <div class="col-12 col-md-3 mt-3"><label class="form-label">Referencia</label><input type="text" class="form-control"></div>
-            </div>
-        </div>
-        <div class="p-4 shadow-lg mb-3" style="background: var(--bs-gray-100);">
-            <div class="row">
-                <div class="col-12 col-md-3 mt-3"><label class="form-label">Detalle</label><input type="text" class="form-control" readonly="" value="Cheque"></div>
-                <div class="col-12 col-md-3 mt-3"><label class="form-label">Cantidad</label><input type="number" class="form-control"></div>
-                <div class="col-12 col-md-3 mt-3">
-                    <label class="form-label">Banco</label><select class="form-control">
-                        <optgroup label="Escoge un banco">
-                            <option value="" selected=""></option>
-                            <option value="12">BAM</option>
-                            <option value="13">BAC</option>
-                            <option value="14">GYT</option>
-                        </optgroup>
-                    </select>
+            }
+            <div class="p-4 shadow-lg mb-3" style="background: var(--bs-gray-100);">
+                <div class="row">
+                    <div class="col-12 col-md-3 mt-3">
+                        <button class="btn btn-warning form-control" type="submit">Confirmar</button>
+                    </div>
                 </div>
-                <div class="col-12 col-md-3 mt-3"><label class="form-label">Referencia</label><input type="text" class="form-control"></div>
-            </div>
-        </div>
-        <div class="p-4 shadow-lg mb-3" style="background: var(--bs-gray-100);">
-            <div class="row">
-                <div class="col-12 col-md-3 mt-3"><label class="form-label">Detalle</label><input type="text" class="form-control" readonly="" value="Depósito"></div>
-                <div class="col-12 col-md-3 mt-3"><label class="form-label">Cantidad</label><input type="number" class="form-control"></div>
-                <div class="col-12 col-md-3 mt-3">
-                    <label class="form-label">Banco</label><select class="form-control">
-                        <optgroup label="Escoge un banco">
-                            <option value="" selected=""></option>
-                            <option value="12">BAM</option>
-                            <option value="13">BAC</option>
-                            <option value="14">GYT</option>
-                        </optgroup>
-                    </select>
-                </div>
-                <div class="col-12 col-md-3 mt-3"><label class="form-label">Referencia</label><input type="text" class="form-control"></div>
-            </div>
-            <div class="row mt-5">
-                <div class="col-12 col-md-3 mt-3"><button class="btn btn-warning form-control" type="button">Confirmar</button></div>
             </div>
         </div>
     </div>
-</div>
+</form>
+
+@section scripts{
+    <partial name="_ValidationScriptsPartial"></partial>
+}

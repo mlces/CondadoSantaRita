@@ -17,6 +17,8 @@ namespace Api.Controllers
         public UsersController(ApplicationContext context)
         {
             _context = context;
+            _context.Rols.Attach(Rol.Cliente);
+            _context.Rols.Attach(Rol.Administrador);
         }
 
         [HttpPost]
@@ -55,10 +57,7 @@ namespace Api.Controllers
                     Password = password,
                 };
 
-                var rol = await _context.Rols
-                    .SingleOrDefaultAsync(o => o.RolId == Rol.Cliente.RolId);
-
-                user.Rols.Add(rol);
+                user.Rols.Add(Rol.Cliente);
 
                 await _context.Users.AddAsync(user);
                 await _context.SaveChangesAsync();
