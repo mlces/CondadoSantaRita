@@ -16,9 +16,11 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     options.AccessDeniedPath = Constants.PageIndex;
 });
 
+var apiBaseAddress = builder.Configuration.GetValue<string>("ApiBaseAddress");
+
 builder.Services.AddScoped(sp => new HttpClient
 {
-    BaseAddress = new Uri("https://localhost:7141/api/")
+    BaseAddress = new Uri(apiBaseAddress)
 });
 
 var app = builder.Build();
