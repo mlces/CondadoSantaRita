@@ -1,5 +1,7 @@
 ﻿#pragma warning disable CS8603 // Posible tipo de valor devuelto de referencia nulo
+using Microsoft.Extensions.Configuration;
 using Mylces.ControlCenter;
+using System.Runtime.CompilerServices;
 
 namespace Infrastructure
 {
@@ -12,6 +14,11 @@ namespace Infrastructure
         static Configuration()
         {
             Control = new Control(AplicationId);
+        }
+
+        public static void ConfigureConnectionString(IConfiguration configuration)
+        {
+            Control.ConfigureConnectionString(configuration);
         }
 
         public static int LogAction(string message) => Control.LogAction(message);

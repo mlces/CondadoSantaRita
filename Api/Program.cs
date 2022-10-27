@@ -36,6 +36,8 @@ builder.Services.AddControllers().AddJsonOptions(options =>
     options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
 });
 
+Configuration.ConfigureConnectionString(builder.Configuration);
+
 builder.Services.AddDbContext<ApplicationContext>(options => options.UseSqlServer(Configuration.ConnectionString));
 
 builder.Services.AddTransient<TokenManager>();
