@@ -1,4 +1,6 @@
-﻿namespace Core.Entities
+﻿using System.Text.Json.Serialization;
+
+namespace Core.Entities
 {
     public partial class Rol
     {
@@ -10,6 +12,7 @@
         public int RolId { get; set; }
         public string Name { get; set; } = null!;
 
+        [JsonIgnore]
         public virtual ICollection<User> People { get; set; }
 
         public static Rol Administrador { get; private set; } = new() { RolId = 1, Name = nameof(Administrador) };

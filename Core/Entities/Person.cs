@@ -1,4 +1,6 @@
-﻿namespace Core.Entities
+﻿using System.Text.Json.Serialization;
+
+namespace Core.Entities
 {
     public partial class Person
     {
@@ -21,7 +23,9 @@
         public virtual Address? Address { get; set; }
         public virtual User? User { get; set; }
         public virtual ICollection<Contract> Contracts { get; set; }
+        [JsonIgnore]
         public virtual ICollection<Payment> PaymentPayers { get; set; }
+        [JsonIgnore]
         public virtual ICollection<Payment> PaymentReceivers { get; set; }
     }
 }

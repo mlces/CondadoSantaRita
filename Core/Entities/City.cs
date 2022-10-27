@@ -1,4 +1,6 @@
-﻿namespace Core.Entities
+﻿using System.Text.Json.Serialization;
+
+namespace Core.Entities
 {
     public partial class City
     {
@@ -12,6 +14,7 @@
         public int StateId { get; set; }
 
         public virtual State State { get; set; } = null!;
+        [JsonIgnore]
         public virtual ICollection<Address> Addresses { get; set; }
     }
 }

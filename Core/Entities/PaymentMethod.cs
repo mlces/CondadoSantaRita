@@ -1,4 +1,6 @@
-﻿namespace Core.Entities
+﻿using System.Text.Json.Serialization;
+
+namespace Core.Entities
 {
     public partial class PaymentMethod
     {
@@ -10,6 +12,7 @@
         public int PaymentMethodId { get; set; }
         public string Name { get; set; } = null!;
 
+        [JsonIgnore]
         public virtual ICollection<PaymentDetail> PaymentDetails { get; set; }
 
         public static PaymentMethod Efectivo { get; private set; } = new() { PaymentMethodId = 1, Name = nameof(Efectivo) };

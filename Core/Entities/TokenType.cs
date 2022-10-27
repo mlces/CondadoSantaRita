@@ -1,4 +1,6 @@
-﻿namespace Core.Entities
+﻿using System.Text.Json.Serialization;
+
+namespace Core.Entities
 {
     public partial class TokenType
     {
@@ -10,6 +12,7 @@
         public int TokenTypeId { get; set; }
         public string Name { get; set; } = null!;
 
+        [JsonIgnore]
         public virtual ICollection<Token> Tokens { get; set; }
 
         public static TokenType Access { get; private set; } = new() { TokenTypeId = 1, Name = nameof(Access) };

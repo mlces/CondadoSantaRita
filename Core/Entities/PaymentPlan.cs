@@ -1,4 +1,6 @@
-﻿namespace Core.Entities
+﻿using System.Text.Json.Serialization;
+
+namespace Core.Entities
 {
     public partial class PaymentPlan
     {
@@ -11,6 +13,7 @@
         public string Name { get; set; } = null!;
         public decimal Interest { get; set; }
 
+        [JsonIgnore]
         public virtual ICollection<Contract> Contracts { get; set; }
     }
 }

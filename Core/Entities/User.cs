@@ -22,8 +22,8 @@ namespace Core.Entities
         public bool? ResetPassword { get; set; }
 
         public virtual Person Person { get; set; } = null!;
+        [JsonIgnore]
         public virtual ICollection<Token> Tokens { get; set; }
-
         public virtual ICollection<Rol> Rols { get; set; }
     }
 }

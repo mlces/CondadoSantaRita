@@ -1,7 +1,6 @@
 ﻿#pragma warning disable CS8603 // Posible tipo de valor devuelto de referencia nulo
 using Microsoft.Extensions.Configuration;
 using Mylces.ControlCenter;
-using System.Runtime.CompilerServices;
 
 namespace Infrastructure
 {
