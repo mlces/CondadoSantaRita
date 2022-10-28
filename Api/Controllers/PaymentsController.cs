@@ -11,19 +11,19 @@ namespace Api.Controllers
     [MyAuthorize]
     public class PaymentsController : ControllerBase, IController
     {
-        private readonly ApplicationContext _context;
-
         public int PersonId { get; set; }
 
         public Guid TokenId { get; set; }
 
-        public PaymentsController(ApplicationContext context)
+        public ApplicationContext DbContext { get; set; }
+
+        public PaymentsController(ApplicationContext dbContext)
         {
-            _context = context;
-            _context.PaymentMethods.Attach(PaymentMethod.Efectivo);
-            _context.PaymentMethods.Attach(PaymentMethod.Transferencia);
-            _context.PaymentMethods.Attach(PaymentMethod.Cheque);
-            _context.PaymentMethods.Attach(PaymentMethod.Deposito);
+            DbContext = dbContext;
+            DbContext.PaymentMethods.Attach(PaymentMethod.Efectivo);
+            DbContext.PaymentMethods.Attach(PaymentMethod.Transferencia);
+            DbContext.PaymentMethods.Attach(PaymentMethod.Cheque);
+            DbContext.PaymentMethods.Attach(PaymentMethod.Deposito);
         }
 
         [HttpPost]
@@ -33,10 +33,10 @@ namespace Api.Controllers
             var response = new Response<Payment>();
             try
             {
-                var contract = await _context.Contracts
+                var contract = await DbContext.Contracts
                     .SingleOrDefaultAsync(o => o.ContractId == request.ContractId);
 
-                var paymentNumber = await _context.Payments
+                var paymentNumber = await DbContext.Payments
                     .Where(o => o.ContractId == request.ContractId)
                     .OrderByDescending(o => o.PaymentNumber)
                     .Select(o => o.PaymentNumber)
@@ -88,8 +88,8 @@ namespace Api.Controllers
                 contract.BalancePaid = payment.NewBalancePaid;
                 contract.BalancePayable = payment.NewBalancePayable;
 
-                await _context.Payments.AddAsync(payment);
-                await _context.SaveChangesAsync();
+                await DbContext.Payments.AddAsync(payment);
+                await DbContext.SaveChangesAsync();
 
                 response.Code = ResponseCode.Ok;
                 response.Data = payment;

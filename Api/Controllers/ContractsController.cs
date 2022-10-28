@@ -11,15 +11,15 @@ namespace Api.Controllers
     [MyAuthorize]
     public class ContractsController : ControllerBase, IController
     {
-        private readonly ApplicationContext _context;
-
         public int PersonId { get; set; }
 
         public Guid TokenId { get; set; }
 
-        public ContractsController(ApplicationContext context)
+        public ApplicationContext DbContext { get; set; }
+
+        public ContractsController(ApplicationContext dbContext)
         {
-            _context = context;
+            DbContext = dbContext;
         }
 
         [HttpGet]
@@ -29,7 +29,7 @@ namespace Api.Controllers
             var response = new Response<List<Contract>>();
             try
             {
-                var contracts = await _context.Contracts
+                var contracts = await DbContext.Contracts
                     .Include(o => o.Property)
                     .Include(o => o.PaymentPlan)
                     .Include(o => o.Person)
@@ -57,7 +57,7 @@ namespace Api.Controllers
                     PersonId = default;
                 }
 
-                var contract = await _context.Contracts
+                var contract = await DbContext.Contracts
                     .Include(o => o.Property)
                     .Include(o => o.PaymentPlan)
                     .Include(o => o.Person)
@@ -98,7 +98,7 @@ namespace Api.Controllers
                     PersonId = default;
                 }
 
-                var payments = await _context.Payments
+                var payments = await DbContext.Payments
                     .Include(o => o.Receiver)
                     .Include(o => o.Payer)
                     .Where(o => o.ContractId == contractId)

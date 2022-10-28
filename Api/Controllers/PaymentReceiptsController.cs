@@ -12,18 +12,18 @@ namespace Api.Controllers
     [MyAuthorize]
     public class PaymentReceiptsController : ControllerBase, IController
     {
-        private readonly ApplicationContext _context;
-
         private readonly PaymentReceiptsManager _paymentReceiptsManager;
 
         public int PersonId { get; set; }
 
         public Guid TokenId { get; set; }
 
-        public PaymentReceiptsController(ApplicationContext context, PaymentReceiptsManager paymentReceiptsManager)
+        public ApplicationContext DbContext { get; set; }
+
+        public PaymentReceiptsController(PaymentReceiptsManager paymentReceiptsManager, ApplicationContext dbContext)
         {
-            _context = context;
             _paymentReceiptsManager = paymentReceiptsManager;
+            DbContext = dbContext;
         }
 
         [HttpGet]
@@ -38,14 +38,14 @@ namespace Api.Controllers
                     PersonId = default;
                 }
 
-                var paymentReceipt = await _context.PaymentReceipts
+                var paymentReceipt = await DbContext.PaymentReceipts
                     .Include(o => o.Payment.Contract)
                     .Where(o => o.Payment.Contract.PersonId == (PersonId != default ? PersonId : o.Payment.Contract.PersonId))
                     .SingleOrDefaultAsync(o => o.PaymentId == paymentId);
 
                 if (paymentReceipt == null)
                 {
-                    var payment = await _context.Payments
+                    var payment = await DbContext.Payments
                         .Include(o => o.Payer)
                         .Include(o => o.Receiver)
                         .Include(o => o.Contract)
@@ -59,7 +59,7 @@ namespace Api.Controllers
                         return Ok(response);
                     }
 
-                    var paymentDetails = await _context.PaymentDetails
+                    var paymentDetails = await DbContext.PaymentDetails
                         .Include(o => o.Bank)
                         .Include(o => o.Payment.Contract)
                         .Where(o => o.PaymentId == paymentId && o.Payment.Contract.PersonId == (PersonId != default ? PersonId : o.Payment.Contract.PersonId))
@@ -73,8 +73,8 @@ namespace Api.Controllers
                         Data = report
                     };
 
-                    _context.PaymentReceipts.Add(paymentReceipt);
-                    _context.SaveChanges();
+                    DbContext.PaymentReceipts.Add(paymentReceipt);
+                    DbContext.SaveChanges();
                 }
 
                 response.Code = ResponseCode.Ok;

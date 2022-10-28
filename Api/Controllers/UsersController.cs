@@ -12,17 +12,17 @@ namespace Api.Controllers
     [MyAuthorize]
     public class UsersController : ControllerBase, IController
     {
-        private readonly ApplicationContext _context;
-
         public int PersonId { get; set; }
 
         public Guid TokenId { get; set; }
 
-        public UsersController(ApplicationContext context)
+        public ApplicationContext DbContext { get; set; }
+
+        public UsersController(ApplicationContext dbContext)
         {
-            _context = context;
-            _context.Rols.Attach(Rol.Cliente);
-            _context.Rols.Attach(Rol.Administrador);
+            DbContext = dbContext;
+            DbContext.Rols.Attach(Rol.Cliente);
+            DbContext.Rols.Attach(Rol.Administrador);
         }
 
         [HttpGet]
@@ -33,7 +33,7 @@ namespace Api.Controllers
             var response = new Response<User>();
             try
             {
-                var person = await _context.People
+                var person = await DbContext.People
                     .Where(o => o.PersonId == personId)
                     .SingleOrDefaultAsync();
 
@@ -56,8 +56,8 @@ namespace Api.Controllers
 
                 user.Rols.Add(Rol.Cliente);
 
-                await _context.Users.AddAsync(user);
-                await _context.SaveChangesAsync();
+                await DbContext.Users.AddAsync(user);
+                await DbContext.SaveChangesAsync();
 
                 response.Code = ResponseCode.Ok;
                 response.Data = user;
@@ -77,7 +77,7 @@ namespace Api.Controllers
             var response = new Response<User>();
             try
             {
-                var user = await _context.Users
+                var user = await DbContext.Users
                     .Where(o => o.PersonId == personId)
                     .SingleOrDefaultAsync();
 
@@ -94,7 +94,7 @@ namespace Api.Controllers
                 user.Password = password;
                 user.ResetPassword = true;
 
-                await _context.SaveChangesAsync();
+                await DbContext.SaveChangesAsync();
 
                 response.Code = ResponseCode.Ok;
                 response.Data = user;

@@ -12,20 +12,20 @@ namespace Api.Controllers
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class TokensController : ControllerBase, IController
     {
-        private readonly ApplicationContext _context;
-
         private readonly TokenManager _tokenManager;
 
         public int PersonId { get; set; }
 
         public Guid TokenId { get; set; }
 
-        public TokensController(ApplicationContext context, TokenManager tokenManager)
+        public ApplicationContext DbContext { get; set; }
+
+        public TokensController(TokenManager tokenManager, ApplicationContext dbContext)
         {
-            _context = context;
             _tokenManager = tokenManager;
-            _context.TokenTypes.Attach(TokenType.Access);
-            _context.TokenTypes.Attach(TokenType.Reset);
+            DbContext = dbContext;
+            DbContext.TokenTypes.Attach(TokenType.Access);
+            DbContext.TokenTypes.Attach(TokenType.Reset);
         }
 
         [HttpPost]
@@ -35,7 +35,7 @@ namespace Api.Controllers
             var response = new Response<Token>();
             try
             {
-                var user = await _context.Users
+                var user = await DbContext.Users
                     .Include(o => o.Rols)
                     .SingleOrDefaultAsync(o => o.Username == request.Username);
 
@@ -59,10 +59,10 @@ namespace Api.Controllers
                         response.Message = ResponseMessage.EnterANewPassword;
                         response.Data = _tokenManager.GenerateToken(user, TokenType.Reset);
 
-                        await _context.Database.ExecuteSqlRawAsync($"UPDATE [Token] SET [Disabled] = 1 WHERE [PersonID] = {user.PersonId}");
+                        await DbContext.Database.ExecuteSqlRawAsync($"UPDATE [Token] SET [Disabled] = 1 WHERE [PersonID] = {user.PersonId}");
 
-                        await _context.Tokens.AddAsync(response.Data);
-                        await _context.SaveChangesAsync();
+                        await DbContext.Tokens.AddAsync(response.Data);
+                        await DbContext.SaveChangesAsync();
                         return Ok(response);
                     }
                     else
@@ -84,10 +84,10 @@ namespace Api.Controllers
                     response.Code = ResponseCode.Ok;
                     response.Data = _tokenManager.GenerateToken(user, TokenType.Access);
 
-                    await _context.Database.ExecuteSqlRawAsync($"UPDATE [Token] SET [Disabled] = 1 WHERE [PersonID] = {user.PersonId}");
+                    await DbContext.Database.ExecuteSqlRawAsync($"UPDATE [Token] SET [Disabled] = 1 WHERE [PersonID] = {user.PersonId}");
 
-                    await _context.Tokens.AddAsync(response.Data);
-                    await _context.SaveChangesAsync();
+                    await DbContext.Tokens.AddAsync(response.Data);
+                    await DbContext.SaveChangesAsync();
                     return Ok(response);
                 }
             }
@@ -105,7 +105,7 @@ namespace Api.Controllers
             var response = new Response<Token>();
             try
             {
-                var token = await _context.Tokens
+                var token = await DbContext.Tokens
                     .AsNoTracking()
                     .Where(o => o.Disabled == false)
                     .SingleOrDefaultAsync(o => o.TokenId == TokenId);
@@ -117,7 +117,7 @@ namespace Api.Controllers
                     return Ok(response);
                 }
 
-                var user = await _context.Users
+                var user = await DbContext.Users
                     .Include(o => o.Rols)
                     .FirstOrDefaultAsync(o => o.PersonId == PersonId);
 
@@ -145,8 +145,8 @@ namespace Api.Controllers
                 response.Code = ResponseCode.Ok;
                 response.Data = _tokenManager.GenerateToken(user, TokenType.Access);
 
-                await _context.Tokens.AddAsync(response.Data);
-                await _context.SaveChangesAsync();
+                await DbContext.Tokens.AddAsync(response.Data);
+                await DbContext.SaveChangesAsync();
                 return Ok(response);
             }
             catch (Exception ex)

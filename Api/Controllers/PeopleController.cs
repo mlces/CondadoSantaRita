@@ -11,15 +11,15 @@ namespace Api.Controllers
     [MyAuthorize]
     public class PeopleController : ControllerBase, IController
     {
-        private readonly ApplicationContext _context;
-
         public int PersonId { get; set; }
 
         public Guid TokenId { get; set; }
 
-        public PeopleController(ApplicationContext context)
+        public ApplicationContext DbContext { get; set; }
+
+        public PeopleController(ApplicationContext dbContext)
         {
-            _context = context;
+            DbContext = dbContext;
         }
 
         [HttpGet]
@@ -29,7 +29,7 @@ namespace Api.Controllers
             var response = new Response<List<Person>>();
             try
             {
-                var people = await _context.People
+                var people = await DbContext.People
                     .ToListAsync();
 
                 response.Code = ResponseCode.Ok;
@@ -54,7 +54,7 @@ namespace Api.Controllers
                     personId = PersonId;
                 }
 
-                var person = await _context.People
+                var person = await DbContext.People
                     .Include(o => o.Address.City.State)
                     .Include(o => o.User)
                     .SingleOrDefaultAsync(o => o.PersonId == personId);
@@ -93,7 +93,7 @@ namespace Api.Controllers
                     personId = PersonId;
                 }
 
-                var contracts = await _context.Contracts
+                var contracts = await DbContext.Contracts
                     .Include(o => o.Property)
                     .Where(o => o.PersonId == personId)
                     .ToListAsync();

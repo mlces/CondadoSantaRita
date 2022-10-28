@@ -10,13 +10,17 @@ namespace Api.Controllers
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Authorize(Roles = nameof(Rol.Administrador))]
     [MyAuthorize]
-    public class CatalogsController : ControllerBase
+    public class CatalogsController : ControllerBase, IController
     {
-        private readonly ApplicationContext _context;
+        public int PersonId { get; set; }
 
-        public CatalogsController(ApplicationContext context)
+        public Guid TokenId { get; set; }
+
+        public ApplicationContext DbContext { get; set; }
+
+        public CatalogsController(ApplicationContext dbContext)
         {
-            _context = context;
+            DbContext = dbContext;
         }
 
         [HttpGet]
@@ -25,7 +29,7 @@ namespace Api.Controllers
             var response = new Response<List<Bank>>();
             try
             {
-                var banks = await _context.Banks
+                var banks = await DbContext.Banks
                     .ToListAsync();
 
                 response.Code = ResponseCode.Ok;
@@ -44,7 +48,7 @@ namespace Api.Controllers
             var response = new Response<List<State>>();
             try
             {
-                var banks = await _context.States
+                var banks = await DbContext.States
                     .ToListAsync();
 
                 response.Code = ResponseCode.Ok;
@@ -63,7 +67,7 @@ namespace Api.Controllers
             var response = new Response<List<City>>();
             try
             {
-                var banks = await _context.Cities
+                var banks = await DbContext.Cities
                     .ToListAsync();
 
                 response.Code = ResponseCode.Ok;

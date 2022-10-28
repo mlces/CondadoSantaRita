@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
 namespace Api.Attributes
@@ -27,6 +28,18 @@ namespace Api.Attributes
 
                     claim = user.FindFirst(ClaimTypes.Sid);
                     controller.TokenId = claim != null ? new(claim.Value) : default;
+
+                    bool tokenDisabled = controller.DbContext.Tokens
+                        .AsNoTracking()
+                        .Where(o => o.TokenId == controller.TokenId)
+                        .Select(o => o.Disabled)
+                        .SingleOrDefault();
+
+                    if (tokenDisabled)
+                    {
+                        context.Result = new UnauthorizedResult();
+                        return;
+                    }
                 }
             }
             catch (Exception ex)
