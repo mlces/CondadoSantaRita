@@ -1,5 +1,4 @@
-﻿using Infrastructure.Persistence;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -9,9 +8,14 @@ namespace Api.Controllers
     [ApiController]
     [Route("api/[controller]")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public class PeopleController : ControllerBase
+    [MyAuthorize]
+    public class PeopleController : ControllerBase, IController
     {
         private readonly ApplicationContext _context;
+
+        public int PersonId { get; set; }
+
+        public Guid TokenId { get; set; }
 
         public PeopleController(ApplicationContext context)
         {
@@ -25,13 +29,6 @@ namespace Api.Controllers
             var response = new Response<List<Person>>();
             try
             {
-                if (!User.TokenIsAccess())
-                {
-                    response.Code = ResponseCode.Unauthorized;
-                    response.Message = ResponseMessage.AnErrorHasOccurred;
-                    return Ok(response);
-                }
-
                 var people = await _context.People
                     .ToListAsync();
 
@@ -52,18 +49,9 @@ namespace Api.Controllers
             var response = new Response<Person>();
             try
             {
-                User.RecoverClaims(out int personIdToken, out Guid tokenId);
-
-                if (!User.TokenIsAccess())
-                {
-                    response.Code = ResponseCode.Unauthorized;
-                    response.Message = ResponseMessage.AnErrorHasOccurred;
-                    return Ok(response);
-                }
-
                 if (!User.IsInRole(Rol.Administrador.Name))
                 {
-                    personId = personIdToken;
+                    personId = PersonId;
                 }
 
                 var person = await _context.People
@@ -100,18 +88,9 @@ namespace Api.Controllers
             var response = new Response<List<Contract>>();
             try
             {
-                User.RecoverClaims(out int personIdToken, out Guid tokenId);
-
-                if (!User.TokenIsAccess())
-                {
-                    response.Code = ResponseCode.Unauthorized;
-                    response.Message = ResponseMessage.AnErrorHasOccurred;
-                    return Ok(response);
-                }
-
                 if (!User.IsInRole(Rol.Administrador.Name))
                 {
-                    personId = personIdToken;
+                    personId = PersonId;
                 }
 
                 var contracts = await _context.Contracts

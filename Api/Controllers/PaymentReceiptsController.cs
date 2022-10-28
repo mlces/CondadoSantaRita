@@ -1,5 +1,4 @@
 ﻿using Api.Reports;
-using Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -10,11 +9,16 @@ namespace Api.Controllers
     [ApiController]
     [Route("api/[controller]")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public class PaymentReceiptsController : ControllerBase
+    [MyAuthorize]
+    public class PaymentReceiptsController : ControllerBase, IController
     {
         private readonly ApplicationContext _context;
 
         private readonly PaymentReceiptsManager _paymentReceiptsManager;
+
+        public int PersonId { get; set; }
+
+        public Guid TokenId { get; set; }
 
         public PaymentReceiptsController(ApplicationContext context, PaymentReceiptsManager paymentReceiptsManager)
         {
@@ -29,23 +33,14 @@ namespace Api.Controllers
             var response = new Response<PaymentReceipt>();
             try
             {
-                User.RecoverClaims(out int personIdToken, out Guid tokenId);
-
-                if (!User.TokenIsAccess())
-                {
-                    response.Code = ResponseCode.Unauthorized;
-                    response.Message = ResponseMessage.AnErrorHasOccurred;
-                    return Ok(response);
-                }
-
                 if (User.IsInRole(Rol.Administrador.Name))
                 {
-                    personIdToken = default;
+                    PersonId = default;
                 }
 
                 var paymentReceipt = await _context.PaymentReceipts
                     .Include(o => o.Payment.Contract)
-                    .Where(o => o.Payment.Contract.PersonId == (personIdToken != default ? personIdToken : o.Payment.Contract.PersonId))
+                    .Where(o => o.Payment.Contract.PersonId == (PersonId != default ? PersonId : o.Payment.Contract.PersonId))
                     .SingleOrDefaultAsync(o => o.PaymentId == paymentId);
 
                 if (paymentReceipt == null)
@@ -55,7 +50,7 @@ namespace Api.Controllers
                         .Include(o => o.Receiver)
                         .Include(o => o.Contract)
                         .ThenInclude(o => o.Property)
-                        .Where(o => o.Contract.PersonId == (personIdToken != default ? personIdToken : o.Contract.PersonId))
+                        .Where(o => o.Contract.PersonId == (PersonId != default ? PersonId : o.Contract.PersonId))
                         .SingleOrDefaultAsync(o => o.PaymentId == paymentId);
 
                     if (payment == null)
@@ -67,7 +62,7 @@ namespace Api.Controllers
                     var paymentDetails = await _context.PaymentDetails
                         .Include(o => o.Bank)
                         .Include(o => o.Payment.Contract)
-                        .Where(o => o.PaymentId == paymentId && o.Payment.Contract.PersonId == (personIdToken != default ? personIdToken : o.Payment.Contract.PersonId))
+                        .Where(o => o.PaymentId == paymentId && o.Payment.Contract.PersonId == (PersonId != default ? PersonId : o.Payment.Contract.PersonId))
                         .ToListAsync();
 
                     var report = _paymentReceiptsManager.Generate(payment, paymentDetails);

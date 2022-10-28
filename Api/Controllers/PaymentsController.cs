@@ -1,5 +1,4 @@
-﻿using Infrastructure.Persistence;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -9,9 +8,14 @@ namespace Api.Controllers
     [ApiController]
     [Route("api/[controller]")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public class PaymentsController : ControllerBase
+    [MyAuthorize]
+    public class PaymentsController : ControllerBase, IController
     {
         private readonly ApplicationContext _context;
+
+        public int PersonId { get; set; }
+
+        public Guid TokenId { get; set; }
 
         public PaymentsController(ApplicationContext context)
         {
@@ -29,8 +33,6 @@ namespace Api.Controllers
             var response = new Response<Payment>();
             try
             {
-                User.RecoverClaims(out int personIdToken, out Guid tokenId);
-
                 var contract = await _context.Contracts
                     .SingleOrDefaultAsync(o => o.ContractId == request.ContractId);
 
@@ -47,7 +49,7 @@ namespace Api.Controllers
                     Description = request.Description,
                     PreviousBalancePaid = contract.BalancePaid,
                     PreviousBalancePayable = contract.BalancePayable,
-                    ReceiverId = personIdToken,
+                    ReceiverId = PersonId,
                     PayerId = request.PayerId
                 };
 

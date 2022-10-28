@@ -1,5 +1,4 @@
 ﻿using Api.Tokens;
-using Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -8,14 +7,18 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Api.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public class TokensController : ControllerBase
+    public class TokensController : ControllerBase, IController
     {
         private readonly ApplicationContext _context;
 
         private readonly TokenManager _tokenManager;
+
+        public int PersonId { get; set; }
+
+        public Guid TokenId { get; set; }
 
         public TokensController(ApplicationContext context, TokenManager tokenManager)
         {
@@ -56,6 +59,8 @@ namespace Api.Controllers
                         response.Message = ResponseMessage.EnterANewPassword;
                         response.Data = _tokenManager.GenerateToken(user, TokenType.Reset);
 
+                        await _context.Database.ExecuteSqlRawAsync($"UPDATE [Token] SET [Disabled] = 1 WHERE [PersonID] = {user.PersonId}");
+
                         await _context.Tokens.AddAsync(response.Data);
                         await _context.SaveChangesAsync();
                         return Ok(response);
@@ -79,6 +84,8 @@ namespace Api.Controllers
                     response.Code = ResponseCode.Ok;
                     response.Data = _tokenManager.GenerateToken(user, TokenType.Access);
 
+                    await _context.Database.ExecuteSqlRawAsync($"UPDATE [Token] SET [Disabled] = 1 WHERE [PersonID] = {user.PersonId}");
+
                     await _context.Tokens.AddAsync(response.Data);
                     await _context.SaveChangesAsync();
                     return Ok(response);
@@ -92,23 +99,27 @@ namespace Api.Controllers
 
         [HttpPost]
         [Route("[action]")]
+        [MyAuthorize(nameof(TokenType.Reset))]
         public async Task<ActionResult> Reset(PasswordRequest request)
         {
             var response = new Response<Token>();
             try
             {
-                User.RecoverClaims(out int personIdToken, out Guid tokenId);
+                var token = await _context.Tokens
+                    .AsNoTracking()
+                    .Where(o => o.Disabled == false)
+                    .SingleOrDefaultAsync(o => o.TokenId == TokenId);
 
-                if (!User.TokenIsReset())
+                if (token == null)
                 {
                     response.Code = ResponseCode.Unauthorized;
-                    response.Message = ResponseMessage.AnErrorHasOccurred;
+                    response.Message = ResponseMessage.SessionHasBeenClosed;
                     return Ok(response);
                 }
 
                 var user = await _context.Users
                     .Include(o => o.Rols)
-                    .FirstOrDefaultAsync(o => o.PersonId == personIdToken);
+                    .FirstOrDefaultAsync(o => o.PersonId == PersonId);
 
                 if (user == null)
                 {

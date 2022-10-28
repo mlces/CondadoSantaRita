@@ -1,5 +1,4 @@
 ﻿using Humanizer;
-using System.Security.Claims;
 
 namespace Api.Utilities
 {
@@ -27,16 +26,6 @@ namespace Api.Utilities
             return result.Humanize(LetterCasing.Sentence);
         }
 
-        public static bool TokenIsReset(this ClaimsPrincipal user)
-        {
-            return user.FindFirst(ClaimTypes.Version)?.Value == TokenType.Reset.Name;
-        }
-
-        public static bool TokenIsAccess(this ClaimsPrincipal user)
-        {
-            return user.FindFirst(ClaimTypes.Version)?.Value == TokenType.Access.Name;
-        }
-
         public static Response<T> GenerateError<T>(this Response<T> response, Exception ex)
         {
             var errorId = Configuration.LogError(ex.ToString());
@@ -44,15 +33,6 @@ namespace Api.Utilities
             response.Message = ResponseMessage.AnErrorHasOccurredAndId(errorId);
             response.Data = default;
             return response;
-        }
-
-        public static void RecoverClaims(this ClaimsPrincipal user, out int personId, out Guid tokenId)
-        {
-            Claim? claim = user.FindFirst(ClaimTypes.Actor);
-            personId = claim != null ? int.Parse(claim.Value) : default;
-
-            claim = user.FindFirst(ClaimTypes.Sid);
-            tokenId = claim != null ? new(claim.Value) : default;
         }
     }
 }

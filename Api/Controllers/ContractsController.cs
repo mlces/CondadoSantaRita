@@ -1,5 +1,4 @@
-﻿using Infrastructure.Persistence;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -9,9 +8,14 @@ namespace Api.Controllers
     [ApiController]
     [Route("api/[controller]")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public class ContractsController : ControllerBase
+    [MyAuthorize]
+    public class ContractsController : ControllerBase, IController
     {
         private readonly ApplicationContext _context;
+
+        public int PersonId { get; set; }
+
+        public Guid TokenId { get; set; }
 
         public ContractsController(ApplicationContext context)
         {
@@ -25,13 +29,6 @@ namespace Api.Controllers
             var response = new Response<List<Contract>>();
             try
             {
-                if (!User.TokenIsAccess())
-                {
-                    response.Code = ResponseCode.Unauthorized;
-                    response.Message = ResponseMessage.AnErrorHasOccurred;
-                    return Ok(response);
-                }
-
                 var contracts = await _context.Contracts
                     .Include(o => o.Property)
                     .Include(o => o.PaymentPlan)
@@ -55,25 +52,16 @@ namespace Api.Controllers
             var response = new Response<Contract>();
             try
             {
-                User.RecoverClaims(out int personIdToken, out Guid tokenId);
-
-                if (!User.TokenIsAccess())
-                {
-                    response.Code = ResponseCode.Unauthorized;
-                    response.Message = ResponseMessage.AnErrorHasOccurred;
-                    return Ok(response);
-                }
-
                 if (User.IsInRole(Rol.Administrador.Name))
                 {
-                    personIdToken = default;
+                    PersonId = default;
                 }
 
                 var contract = await _context.Contracts
                     .Include(o => o.Property)
                     .Include(o => o.PaymentPlan)
                     .Include(o => o.Person)
-                    .Where(o => o.PersonId == (personIdToken != default ? personIdToken : o.PersonId))
+                    .Where(o => o.PersonId == (PersonId != default ? PersonId : o.PersonId))
                     .SingleOrDefaultAsync(o => o.ContractId == contractId);
 
                 if (contract == null)
@@ -105,25 +93,16 @@ namespace Api.Controllers
             var response = new Response<List<Payment>>();
             try
             {
-                User.RecoverClaims(out int personIdToken, out Guid tokenId);
-
-                if (!User.TokenIsAccess())
-                {
-                    response.Code = ResponseCode.Unauthorized;
-                    response.Message = ResponseMessage.AnErrorHasOccurred;
-                    return Ok(response);
-                }
-
                 if (User.IsInRole(Rol.Administrador.Name))
                 {
-                    personIdToken = default;
+                    PersonId = default;
                 }
 
                 var payments = await _context.Payments
                     .Include(o => o.Receiver)
                     .Include(o => o.Payer)
                     .Where(o => o.ContractId == contractId)
-                    .Where(o => o.Contract.PersonId == (personIdToken != default ? personIdToken : o.Contract.PersonId))
+                    .Where(o => o.Contract.PersonId == (PersonId != default ? PersonId : o.Contract.PersonId))
                     .ToListAsync();
 
                 response.Code = ResponseCode.Ok;

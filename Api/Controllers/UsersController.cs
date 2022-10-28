@@ -1,5 +1,4 @@
-﻿using Infrastructure.Persistence;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -7,12 +6,17 @@ using System.Text;
 
 namespace Api.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public class UsersController : ControllerBase
+    [MyAuthorize]
+    public class UsersController : ControllerBase, IController
     {
         private readonly ApplicationContext _context;
+
+        public int PersonId { get; set; }
+
+        public Guid TokenId { get; set; }
 
         public UsersController(ApplicationContext context)
         {
@@ -29,13 +33,6 @@ namespace Api.Controllers
             var response = new Response<User>();
             try
             {
-                if (!User.TokenIsAccess())
-                {
-                    response.Code = ResponseCode.Unauthorized;
-                    response.Message = ResponseMessage.AnErrorHasOccurred;
-                    return Ok(response);
-                }
-
                 var person = await _context.People
                     .Where(o => o.PersonId == personId)
                     .SingleOrDefaultAsync();
@@ -80,13 +77,6 @@ namespace Api.Controllers
             var response = new Response<User>();
             try
             {
-                if (!User.TokenIsAccess())
-                {
-                    response.Code = ResponseCode.Unauthorized;
-                    response.Message = ResponseMessage.AnErrorHasOccurred;
-                    return Ok(response);
-                }
-
                 var user = await _context.Users
                     .Where(o => o.PersonId == personId)
                     .SingleOrDefaultAsync();

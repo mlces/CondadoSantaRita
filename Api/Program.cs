@@ -1,11 +1,13 @@
+global using Api.Attributes;
+global using Api.Interfaces;
 global using Api.Utilities;
 global using Core.Entities;
 global using Core.Models.Request;
 global using Core.Models.Response;
 global using Infrastructure;
+global using Infrastructure.Persistence;
 using Api.Reports;
 using Api.Tokens;
-using Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
