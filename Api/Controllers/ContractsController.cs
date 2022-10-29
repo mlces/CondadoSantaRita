@@ -114,5 +114,54 @@ namespace Api.Controllers
                 return Ok(response.GenerateError(ex));
             }
         }
+
+        [HttpPost]
+        [Authorize(Roles = nameof(Rol.Administrador))]
+        public async Task<ActionResult> Create(ContractRequest contractRequest)
+        {
+            var response = new Response<Contract>();
+            try
+            {
+                var contractExist = await DbContext.Contracts
+                    .Where(o => o.PropertyId == contractRequest.PropertyId)
+                    .AnyAsync();
+
+                if (contractExist)
+                {
+                    response.Message = ResponseMessage.AnErrorHasOccurred;
+                    return Ok(response);
+                }
+
+                var property = await DbContext.Properties
+                    .SingleOrDefaultAsync(o => o.PropertyId == contractRequest.PropertyId);
+
+                var paymentPlan = await DbContext.PaymentPlans
+                    .SingleOrDefaultAsync(o => o.PaymentPlanId == contractRequest.PaymentPlanId);
+
+                var person = await DbContext.People
+                    .SingleOrDefaultAsync(o => o.PersonId == PersonId);
+
+                Contract contract = new()
+                {
+                    PropertyId = contractRequest.PropertyId,
+                    PersonId = contractRequest.PersonId,
+                    PaymentPlanId = contractRequest.PaymentPlanId,
+                    PaymentDay = contractRequest.PaymentDay,
+                    BalancePaid = 0,
+                    BalancePayable = property.Price * (100 + paymentPlan.Interest) / 100
+                };
+
+                await DbContext.Contracts.AddAsync(contract);
+                await DbContext.SaveChangesAsync();
+
+                response.Code = ResponseCode.Ok;
+                response.Data = contract;
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return Ok(response.GenerateError(ex));
+            }
+        }
     }
 }

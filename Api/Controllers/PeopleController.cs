@@ -107,5 +107,40 @@ namespace Api.Controllers
                 return Ok(response.GenerateError(ex));
             }
         }
+
+        [HttpPost]
+        [Authorize(Roles = nameof(Rol.Administrador))]
+        public async Task<ActionResult> Create(PersonRequest personRequest)
+        {
+            var response = new Response<Person>();
+            try
+            {
+                Person person = new()
+                {
+                    FirstName = personRequest.FirstName,
+                    LastName = personRequest.LastName,
+                    EmailAddress = personRequest.EmailAddress,
+                    PhoneNumber = personRequest.PhoneNumber,
+                    NationalId = personRequest.NationalId,
+                    Birthday = personRequest.Birthday,
+                    Address = new()
+                    {
+                        Name = personRequest.AddressName,
+                        CityId = personRequest.CityId
+                    }
+                };
+
+                await DbContext.People.AddAsync(person);
+                await DbContext.SaveChangesAsync();
+
+                response.Code = ResponseCode.Ok;
+                response.Data = person;
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return Ok(response.GenerateError(ex));
+            }
+        }
     }
 }

@@ -1,21 +1,12 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]/[action]")]
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    [Authorize(Roles = nameof(Rol.Administrador))]
-    [MyAuthorize]
-    public class CatalogsController : ControllerBase, IController
+    public class CatalogsController : ControllerBase
     {
-        public int PersonId { get; set; }
-
-        public Guid TokenId { get; set; }
-
         public ApplicationContext DbContext { get; set; }
 
         public CatalogsController(ApplicationContext dbContext)
@@ -30,6 +21,7 @@ namespace Api.Controllers
             try
             {
                 var banks = await DbContext.Banks
+                    .AsNoTracking()
                     .ToListAsync();
 
                 response.Code = ResponseCode.Ok;
@@ -48,11 +40,12 @@ namespace Api.Controllers
             var response = new Response<List<State>>();
             try
             {
-                var banks = await DbContext.States
+                var states = await DbContext.States
+                    .AsNoTracking()
                     .ToListAsync();
 
                 response.Code = ResponseCode.Ok;
-                response.Data = banks;
+                response.Data = states;
                 return Ok(response);
             }
             catch (Exception ex)
@@ -62,16 +55,37 @@ namespace Api.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult> Citiies()
+        public async Task<ActionResult> PaymentPlans()
+        {
+            var response = new Response<List<PaymentPlan>>();
+            try
+            {
+                var paymentPlans = await DbContext.PaymentPlans
+                    .AsNoTracking()
+                    .ToListAsync();
+
+                response.Code = ResponseCode.Ok;
+                response.Data = paymentPlans;
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return Ok(response.GenerateError(ex));
+            }
+        }
+
+        [HttpGet]
+        public async Task<ActionResult> Cities()
         {
             var response = new Response<List<City>>();
             try
             {
-                var banks = await DbContext.Cities
+                var cities = await DbContext.Cities
+                    .AsNoTracking()
                     .ToListAsync();
 
                 response.Code = ResponseCode.Ok;
-                response.Data = banks;
+                response.Data = cities;
                 return Ok(response);
             }
             catch (Exception ex)

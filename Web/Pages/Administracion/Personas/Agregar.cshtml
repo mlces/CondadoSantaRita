@@ -1,0 +1,61 @@
+﻿@page
+@model AgregarModel
+@{
+    ViewData["Title"] = "Agregar";
+}
+
+<form method="post">
+    <div class="mt-5 mb-5">
+        <div class="container">
+            <div class="p-4 shadow-lg" style="background: var(--bs-gray-100);">
+                <div class="row">
+                    <div class="col-12 col-md-6 mt-3">
+                        <label class="form-label">Nombre</label>
+                        <input asp-for="@Model.Input.FirstName" class="form-control">
+                    </div>
+                    <div class="col-12 col-md-6 mt-3">
+                        <label class="form-label">Apellido</label>
+                        <input asp-for="@Model.Input.LastName" class="form-control">
+                    </div>
+                    <div class="col-12 col-md-6 mt-3">
+                        <label class="form-label">Correo electrónico</label>
+                        <input asp-for="@Model.Input.EmailAddress" class="form-control">
+                    </div>
+                    <div class="col-12 col-md-6 mt-3">
+                        <label class="form-label">Teléfono</label>
+                        <input asp-for="@Model.Input.PhoneNumber" class="form-control">
+                    </div>
+                    <div class="col-12 col-md-6 mt-3">
+                        <label class="form-label">CUI</label>
+                        <input asp-for="@Model.Input.NationalId" class="form-control">
+                    </div>
+                    <div class="col-12 col-md-6 mt-3">
+                        <label class="form-label">Nacimiento</label>
+                        <input asp-for="@Model.Input.Birthday" class="form-control">
+                    </div>
+                    <div class="col-12 col-md-6 mt-3">
+                        <label class="form-label">Dirección</label>
+                        <input asp-for="@Model.Input.AddressName" class="form-control">
+                    </div>
+                    <div class="col-12 col-md-6 mt-3">
+                        <label class="form-label">Ciudad</label>
+                        <select asp-for="@Model.Input.CityId" class="form-select" asp-items="@Model.Cities"></select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="mt-5 mb-5">
+        <div class="container">
+            <div class="p-4 shadow-lg mb-3" style="background: var(--bs-gray-100);">
+                <div class="row">
+                    <div class="col-12 col-md-6 mt-3"><button class="btn btn-warning form-control" type="submit">Añadir Persona</button></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section scripts{
+    <partial name="_ValidationScriptsPartial"></partial>
+}

@@ -8,5 +8,7 @@
         public static readonly string PageIndex = "/Index";
         public static readonly string PageSalir = "/Cuenta/Salir";
         public static readonly string PageAdminComprobante = "/Administracion/Pagos/Comprobante";
+        public static readonly string PageAdminPerfil = "/Administracion/Personas/DetallePersona";
+        public static readonly string PageAdminDetalleLote = "/Administracion/Lotes/DetalleLote";
     }
 }

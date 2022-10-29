@@ -1,0 +1,50 @@
+﻿@page
+@model AgregarModel
+@{
+    ViewData["Title"] = "Agregar";
+}
+
+<form method="post">
+    <div class="mt-5 mb-5">
+        <div class="container">
+            <div class="p-4 shadow-lg" style="background: var(--bs-gray-100);">
+                <div class="row">
+                    <input asp-for="@Model.Input.PropertyId" type="hidden" class="form-control">
+                    <div class="col-12 col-md-6 mt-3">
+                        <label class="form-label">Código del lote</label>
+                        <input type="text" value="@Model.Property.Code" class="form-control" readonly>
+                    </div>
+                    <div class="col-12 col-md-6 mt-3">
+                        <label class="form-label">Precio sin interés</label>
+                        <input type="text" value="@Model.Property.Price.ToCurrency()" class="form-control" readonly>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-12 mt-3">
+                        <label class="form-label">Cliente</label>
+                        <select asp-for="@Model.Input.PersonId" asp-items="@Model.People" class="form-select">
+                            <option value="" selected="">Selecciona un cliente</option>
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-6 mt-3">
+                        <label class="form-label">Plan de pago</label>
+                        <select asp-for="@Model.Input.PaymentPlanId" asp-items="@Model.PaymentPlans" class="form-select">
+                            <option value="" selected="">Selecciona un plan de pago</option>
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-6 mt-3">
+                        <label class="form-label">Día de pago preferido</label>
+                        <input asp-for="@Model.Input.PaymentDay" class="form-control">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="mt-5 mb-5">
+        <div class="container">
+            <div class="p-4 shadow-lg mb-3" style="background: var(--bs-gray-100);">
+                <div class="row">
+                    <div class="col-12 col-md-6 mt-3"><button class="btn btn-warning form-control" type="submit">Añadir Contrato</button></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
