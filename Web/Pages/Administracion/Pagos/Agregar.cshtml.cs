@@ -71,7 +71,7 @@ namespace Web.Pages.Administracion.Pagos
 
                 Banks = new(content.Data, nameof(Bank.BankId), nameof(Bank.Name));
 
-                var response2 = await _httpClient.GetAsync($"Contracts/{id}");
+                var response2 = await _httpClient.GetAsync($"Agreements/{id}");
 
                 if (response2.StatusCode == HttpStatusCode.Unauthorized)
                 {
@@ -83,7 +83,7 @@ namespace Web.Pages.Administracion.Pagos
                     return RedirectToPage(Constants.PageError);
                 }
 
-                var content2 = await response2.Content.ReadFromJsonAsync<Response<Contract>>();
+                var content2 = await response2.Content.ReadFromJsonAsync<Response<Agreement>>();
 
                 if (content2.Code == ResponseCode.Unauthorized)
                 {
@@ -95,7 +95,7 @@ namespace Web.Pages.Administracion.Pagos
                     return RedirectToPage(Constants.PageError);
                 }
 
-                Input.ContractId = content2.Data.ContractId;
+                Input.PropertyId = content2.Data.PropertyId;
                 Input.PayerId = content2.Data.PersonId;
                 Input.PaymentDetails = new PaymentDetailRequest[4]
                 {

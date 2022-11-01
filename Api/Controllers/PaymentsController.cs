@@ -13,7 +13,7 @@ namespace Api.Controllers
     {
         public int PersonId { get; set; }
 
-        public Guid TokenId { get; set; }
+        public int TokenId { get; set; }
 
         public ApplicationContext DbContext { get; set; }
 
@@ -33,22 +33,22 @@ namespace Api.Controllers
             var response = new Response<Payment>();
             try
             {
-                var contract = await DbContext.Contracts
-                    .SingleOrDefaultAsync(o => o.ContractId == request.ContractId);
+                var Agreement = await DbContext.Agreements
+                    .SingleOrDefaultAsync(o => o.PropertyId == request.PropertyId);
 
                 var paymentNumber = await DbContext.Payments
-                    .Where(o => o.ContractId == request.ContractId)
+                    .Where(o => o.PropertyId == request.PropertyId)
                     .OrderByDescending(o => o.PaymentNumber)
                     .Select(o => o.PaymentNumber)
                     .FirstOrDefaultAsync();
 
                 var payment = new Payment
                 {
-                    ContractId = request.ContractId,
+                    PropertyId = request.PropertyId,
                     PaymentNumber = paymentNumber + 1,
                     Description = request.Description,
-                    PreviousBalancePaid = contract.BalancePaid,
-                    PreviousBalancePayable = contract.BalancePayable,
+                    PreviousBalancePaid = Agreement.BalancePaid,
+                    PreviousBalancePayable = Agreement.BalancePayable,
                     ReceiverId = PersonId,
                     PayerId = request.PayerId
                 };
@@ -82,11 +82,13 @@ namespace Api.Controllers
                     return Ok(response);
                 }
 
-                payment.NewBalancePaid = contract.BalancePaid + payment.TotalAmount;
-                payment.NewBalancePayable = contract.BalancePayable - payment.TotalAmount;
+                payment.NewBalancePaid = Agreement.BalancePaid + payment.TotalAmount;
+                payment.NewBalancePayable = Agreement.BalancePayable - payment.TotalAmount;
 
-                contract.BalancePaid = payment.NewBalancePaid;
-                contract.BalancePayable = payment.NewBalancePayable;
+                Agreement.BalancePaid = payment.NewBalancePaid;
+                Agreement.BalancePayable = payment.NewBalancePayable;
+
+                payment.PaymentId = await DbContext.GetPaymentIdentifier();
 
                 await DbContext.Payments.AddAsync(payment);
                 await DbContext.SaveChangesAsync();

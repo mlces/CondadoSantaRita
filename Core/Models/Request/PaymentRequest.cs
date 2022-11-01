@@ -4,7 +4,7 @@ namespace Core.Models.Request
 {
     public class PaymentRequest
     {
-        public int ContractId { get; set; }
+        public int PropertyId { get; set; }
 
         [Required]
         public string? Description { get; set; }

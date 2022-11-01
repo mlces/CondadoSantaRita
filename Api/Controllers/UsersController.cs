@@ -14,7 +14,7 @@ namespace Api.Controllers
     {
         public int PersonId { get; set; }
 
-        public Guid TokenId { get; set; }
+        public int TokenId { get; set; }
 
         public ApplicationContext DbContext { get; set; }
 

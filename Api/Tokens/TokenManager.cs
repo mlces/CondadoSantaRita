@@ -7,15 +7,24 @@ namespace Api.Tokens
 {
     public class TokenManager
     {
-        public Token GenerateToken(User user, TokenType tokenType)
+        public ApplicationContext DbContext { get; set; }
+
+        public TokenManager(ApplicationContext dbContext)
         {
-            var guid = Guid.NewGuid();
+            DbContext = dbContext;
+        }
+
+        public async Task<Token> GenerateToken(User user, TokenType tokenType)
+        {
+            var tokenId = await DbContext.GetTokenIdentifier();
 
             var claims = new List<Claim>
             {
                 new(ClaimTypes.Actor, user.PersonId.ToString()),
-                new(ClaimTypes.Sid, guid.ToString()),
+                new(ClaimTypes.Sid, tokenId.ToString()),
+                new(ClaimTypes.Version, tokenType.Name)
             };
+
             foreach (var rol in user.Rols)
             {
                 claims.Add(new(ClaimTypes.Role, rol.Name));
@@ -25,15 +34,13 @@ namespace Api.Tokens
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
             var expires = DateTime.Now;
 
-            if (tokenType.Name == TokenType.Access.Name)
+            if (tokenType.Name == nameof(TokenType.Access))
             {
                 expires = expires.AddMinutes(Configuration.TokenValidityMinutesAccess);
-                claims.Add(new(ClaimTypes.Version, TokenType.Access.Name));
             }
             else if (tokenType.Name == TokenType.Reset.Name)
             {
                 expires = expires.AddMinutes(Configuration.TokenValidityMinutesReset);
-                claims.Add(new(ClaimTypes.Version, TokenType.Reset.Name));
             }
 
             JwtSecurityToken token = new(
@@ -46,7 +53,7 @@ namespace Api.Tokens
 
             return new Token()
             {
-                TokenId = guid,
+                TokenId = tokenId,
                 TokenType = tokenType,
                 Data = new JwtSecurityTokenHandler().WriteToken(token),
                 Expires = expires,

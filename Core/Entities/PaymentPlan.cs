@@ -6,7 +6,7 @@ namespace Core.Entities
     {
         public PaymentPlan()
         {
-            Contracts = new HashSet<Contract>();
+            Agreements = new HashSet<Agreement>();
         }
 
         public int PaymentPlanId { get; set; }
@@ -14,6 +14,6 @@ namespace Core.Entities
         public decimal Interest { get; set; }
 
         [JsonIgnore]
-        public virtual ICollection<Contract> Contracts { get; set; }
+        public virtual ICollection<Agreement> Agreements { get; set; }
     }
 }

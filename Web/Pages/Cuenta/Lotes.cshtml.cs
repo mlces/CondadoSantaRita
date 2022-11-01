@@ -14,7 +14,7 @@ namespace Web.Pages.Cuenta
         {
             _httpClient = httpClient;
         }
-        public List<Contract> Contracts { get; set; } = new();
+        public List<Agreement> Agreements { get; set; } = new();
 
         public async Task<ActionResult> OnGet()
         {
@@ -29,7 +29,7 @@ namespace Web.Pages.Cuenta
 
                 var personId = User.FindFirst(ClaimTypes.Actor).Value;
 
-                var response = await _httpClient.GetAsync($"People/{personId}/Contracts");
+                var response = await _httpClient.GetAsync($"People/{personId}/Agreements");
 
                 if (response.StatusCode == HttpStatusCode.Unauthorized)
                 {
@@ -41,7 +41,7 @@ namespace Web.Pages.Cuenta
                     return RedirectToPage(Constants.PageError);
                 }
 
-                var content = await response.Content.ReadFromJsonAsync<Response<List<Contract>>>();
+                var content = await response.Content.ReadFromJsonAsync<Response<List<Agreement>>>();
 
                 if (content.Code == ResponseCode.Unauthorized)
                 {
@@ -53,7 +53,7 @@ namespace Web.Pages.Cuenta
                     return RedirectToPage(Constants.PageError);
                 }
 
-                Contracts = content.Data;
+                Agreements = content.Data;
                 return Page();
             }
             catch (Exception)

@@ -13,7 +13,7 @@ namespace Api.Controllers
     {
         public int PersonId { get; set; }
 
-        public Guid TokenId { get; set; }
+        public int TokenId { get; set; }
 
         public ApplicationContext DbContext { get; set; }
 
@@ -25,14 +25,14 @@ namespace Api.Controllers
         [HttpGet]
         [Route("[action]")]
         [Authorize(Roles = nameof(Rol.Administrador))]
-        public async Task<ActionResult> WithoutContract()
+        public async Task<ActionResult> WithoutAgreement()
         {
             var response = new Response<List<Property>>();
             try
             {
                 var properties = await DbContext.Properties
                     .AsNoTracking()
-                    .Where(o => o.Contracts.Count <= 0)
+                    .Where(o => o.Agreement == null)
                     .ToListAsync();
 
                 response.Code = ResponseCode.Ok;
@@ -48,7 +48,7 @@ namespace Api.Controllers
         [HttpGet]
         [Route("[action]/{propertyId}")]
         [Authorize(Roles = nameof(Rol.Administrador))]
-        public async Task<ActionResult> WithoutContract(int propertyId)
+        public async Task<ActionResult> WithoutAgreement(int propertyId)
         {
             var response = new Response<Property>();
             try

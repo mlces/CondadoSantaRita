@@ -2,7 +2,7 @@
 {
     public partial class Token
     {
-        public Guid TokenId { get; set; }
+        public int TokenId { get; set; }
         public int TokenTypeId { get; set; }
         public string Data { get; set; } = null!;
         public DateTime Expires { get; set; }

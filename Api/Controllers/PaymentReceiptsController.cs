@@ -16,7 +16,7 @@ namespace Api.Controllers
 
         public int PersonId { get; set; }
 
-        public Guid TokenId { get; set; }
+        public int TokenId { get; set; }
 
         public ApplicationContext DbContext { get; set; }
 
@@ -39,8 +39,8 @@ namespace Api.Controllers
                 }
 
                 var paymentReceipt = await DbContext.PaymentReceipts
-                    .Include(o => o.Payment.Contract)
-                    .Where(o => o.Payment.Contract.PersonId == (PersonId != default ? PersonId : o.Payment.Contract.PersonId))
+                    .Include(o => o.Payment.Agreement)
+                    .Where(o => o.Payment.Agreement.PersonId == (PersonId != default ? PersonId : o.Payment.Agreement.PersonId))
                     .SingleOrDefaultAsync(o => o.PaymentId == paymentId);
 
                 if (paymentReceipt == null)
@@ -48,9 +48,9 @@ namespace Api.Controllers
                     var payment = await DbContext.Payments
                         .Include(o => o.Payer)
                         .Include(o => o.Receiver)
-                        .Include(o => o.Contract)
+                        .Include(o => o.Agreement)
                         .ThenInclude(o => o.Property)
-                        .Where(o => o.Contract.PersonId == (PersonId != default ? PersonId : o.Contract.PersonId))
+                        .Where(o => o.Agreement.PersonId == (PersonId != default ? PersonId : o.Agreement.PersonId))
                         .SingleOrDefaultAsync(o => o.PaymentId == paymentId);
 
                     if (payment == null)
@@ -61,8 +61,8 @@ namespace Api.Controllers
 
                     var paymentDetails = await DbContext.PaymentDetails
                         .Include(o => o.Bank)
-                        .Include(o => o.Payment.Contract)
-                        .Where(o => o.PaymentId == paymentId && o.Payment.Contract.PersonId == (PersonId != default ? PersonId : o.Payment.Contract.PersonId))
+                        .Include(o => o.Payment.Agreement)
+                        .Where(o => o.PaymentId == paymentId && o.Payment.Agreement.PersonId == (PersonId != default ? PersonId : o.Payment.Agreement.PersonId))
                         .ToListAsync();
 
                     var report = _paymentReceiptsManager.Generate(payment, paymentDetails);

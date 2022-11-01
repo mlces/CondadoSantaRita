@@ -4,13 +4,13 @@ using System.Security.Claims;
 
 namespace Web.Pages
 {
-    public class ContratosModel : PageModel
+    public class ConveniosModel : PageModel
     {
         private readonly HttpClient _httpClient;
 
         public List<Property> Properties { get; set; } = new();
 
-        public ContratosModel(HttpClient httpClient)
+        public ConveniosModel(HttpClient httpClient)
         {
             _httpClient = httpClient;
         }
@@ -26,7 +26,7 @@ namespace Web.Pages
             {
                 _httpClient.DefaultRequestHeaders.Authorization = new("Bearer", User.FindFirst(ClaimTypes.Authentication).Value);
 
-                var response = await _httpClient.GetAsync("Properties/WithoutContract");
+                var response = await _httpClient.GetAsync("Properties/WithoutAgreement");
 
                 if (response.StatusCode == HttpStatusCode.Unauthorized)
                 {

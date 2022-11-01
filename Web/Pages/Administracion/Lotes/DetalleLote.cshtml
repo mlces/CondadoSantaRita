@@ -10,34 +10,34 @@
             <div class="row">
                 <div class="col-12 col-md-6 mt-3">
                     <label class="form-label">Código de lote</label>
-                    <input type="text" class="form-control" readonly="" value="@Model.Contract.Property.Code">
+                    <input type="text" class="form-control" readonly="" value="@Model.Agreement.Property.Code">
                 </div>
                 <div class="col-12 col-md-6 mt-3">
                     <label class="form-label">Plan de pago</label>
-                    <input type="text" class="form-control" readonly="" value="@Model.Contract.PaymentPlan.Name">
+                    <input type="text" class="form-control" readonly="" value="@Model.Agreement.PaymentPlan.Name">
                 </div>
                 <div class="col-12 col-md-6 mt-3">
                     <label class="form-label">Día de pago del mes</label>
-                    <input type="text" class="form-control" readonly="" value="@Model.Contract.PaymentDay">
+                    <input type="text" class="form-control" readonly="" value="@Model.Agreement.PaymentDay">
                 </div>
                 <div class="col-12 col-md-6 mt-3">
                     <label class="form-label">Acumulado total</label>
-                    <input type="text" class="form-control" readonly="" value="@Model.Contract.BalancePaid.ToCurrency()">
+                    <input type="text" class="form-control" readonly="" value="@Model.Agreement.BalancePaid.ToCurrency()">
                 </div>
                 <div class="col-12 col-md-6 mt-3">
                     <label class="form-label">Saldo actual</label>
-                    <input type="text" class="form-control" readonly="" value="@Model.Contract.BalancePayable.ToCurrency()">
+                    <input type="text" class="form-control" readonly="" value="@Model.Agreement.BalancePayable.ToCurrency()">
                 </div>
                 <div class="col-12 col-md-6 mt-3">
                     <label class="form-label">Fecha de compra</label>
-                    <input type="text" class="form-control" readonly="" value="@Model.Contract.RegistrationDate">
+                    <input type="text" class="form-control" readonly="" value="@Model.Agreement.RegistrationDate">
                 </div>
                 <div class="col-12 col-md-6 mt-3">
                     <label class="form-label">Cliente</label>
-                    <input type="text" class="form-control" readonly="" value="@string.Format("{0} {1}", Model.Contract.Person.FirstName, Model.Contract.Person.LastName)">
+                    <input type="text" class="form-control" readonly="" value="@string.Format("{0} {1}", Model.Agreement.Person.FirstName, Model.Agreement.Person.LastName)">
                 </div>
                 <div class="col-12 col-md-6 d-lg-flex align-items-lg-end mt-3">
-                    <a asp-page="/Administracion/Pagos/Agregar" asp-route-id="@Model.Contract.ContractId" class="btn btn-warning form-control" type="button">Registrar Pago</a>
+                    <a asp-page="/Administracion/Pagos/Agregar" asp-route-id="@Model.Agreement.PropertyId" class="btn btn-warning form-control" type="button">Registrar Pago</a>
                 </div>
             </div>
         </div>

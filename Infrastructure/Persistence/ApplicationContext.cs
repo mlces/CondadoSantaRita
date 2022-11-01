@@ -1,4 +1,5 @@
 ﻿using Core.Entities;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Persistence
@@ -15,9 +16,10 @@ namespace Infrastructure.Persistence
         }
 
         public virtual DbSet<Address> Addresses { get; set; } = null!;
+        public virtual DbSet<Agreement> Agreements { get; set; } = null!;
+        public virtual DbSet<AgreementHistory> AgreementHistories { get; set; } = null!;
         public virtual DbSet<Bank> Banks { get; set; } = null!;
         public virtual DbSet<City> Cities { get; set; } = null!;
-        public virtual DbSet<Contract> Contracts { get; set; } = null!;
         public virtual DbSet<Payment> Payments { get; set; } = null!;
         public virtual DbSet<PaymentDetail> PaymentDetails { get; set; } = null!;
         public virtual DbSet<PaymentMethod> PaymentMethods { get; set; } = null!;
@@ -60,6 +62,78 @@ namespace Infrastructure.Persistence
                     .HasConstraintName("FK_Address_Person");
             });
 
+            modelBuilder.Entity<Agreement>(entity =>
+            {
+                entity.HasKey(e => e.PropertyId);
+
+                entity.ToTable("Agreement");
+
+                entity.Property(e => e.PropertyId)
+                    .ValueGeneratedNever()
+                    .HasColumnName("PropertyID");
+
+                entity.Property(e => e.BalancePaid).HasColumnType("decimal(10, 2)");
+
+                entity.Property(e => e.BalancePayable).HasColumnType("decimal(10, 2)");
+
+                entity.Property(e => e.PaymentPlanId).HasColumnName("PaymentPlanID");
+
+                entity.Property(e => e.PersonId).HasColumnName("PersonID");
+
+                entity.Property(e => e.RegistrationDate)
+                    .HasColumnType("datetime")
+                    .HasDefaultValueSql("(getdate())");
+
+                entity.HasOne(d => d.PaymentPlan)
+                    .WithMany(p => p.Agreements)
+                    .HasForeignKey(d => d.PaymentPlanId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_Agreement_PaymentPlan");
+
+                entity.HasOne(d => d.Person)
+                    .WithMany(p => p.Agreements)
+                    .HasForeignKey(d => d.PersonId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_Agreement_Person");
+
+                entity.HasOne(d => d.Property)
+                    .WithOne(p => p.Agreement)
+                    .HasForeignKey<Agreement>(d => d.PropertyId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_Agreement_Property");
+            });
+
+            modelBuilder.Entity<AgreementHistory>(entity =>
+            {
+                entity.HasKey(e => e.HistoryId);
+
+                entity.ToTable("AgreementHistory");
+
+                entity.Property(e => e.HistoryId)
+                    .ValueGeneratedNever()
+                    .HasColumnName("HistoryID");
+
+                entity.Property(e => e.BalancePaid).HasColumnType("decimal(10, 2)");
+
+                entity.Property(e => e.BalancePayable).HasColumnType("decimal(10, 2)");
+
+                entity.Property(e => e.PaymentPlanId).HasColumnName("PaymentPlanID");
+
+                entity.Property(e => e.PersonId).HasColumnName("PersonID");
+
+                entity.Property(e => e.PropertyId).HasColumnName("PropertyID");
+
+                entity.Property(e => e.RegistrationDate)
+                    .HasColumnType("datetime")
+                    .HasDefaultValueSql("(getdate())");
+
+                entity.HasOne(d => d.Property)
+                    .WithMany(p => p.AgreementHistories)
+                    .HasForeignKey(d => d.PropertyId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_AgreementHistory_Agreement");
+            });
+
             modelBuilder.Entity<Bank>(entity =>
             {
                 entity.ToTable("Bank");
@@ -94,55 +168,16 @@ namespace Infrastructure.Persistence
                     .HasConstraintName("FK_City_State");
             });
 
-            modelBuilder.Entity<Contract>(entity =>
-            {
-                entity.ToTable("Contract");
-
-                entity.Property(e => e.ContractId).HasColumnName("ContractID");
-
-                entity.Property(e => e.BalancePaid).HasColumnType("decimal(10, 2)");
-
-                entity.Property(e => e.BalancePayable).HasColumnType("decimal(10, 2)");
-
-                entity.Property(e => e.PaymentPlanId).HasColumnName("PaymentPlanID");
-
-                entity.Property(e => e.PersonId).HasColumnName("PersonID");
-
-                entity.Property(e => e.PropertyId).HasColumnName("PropertyID");
-
-                entity.Property(e => e.RegistrationDate)
-                    .HasColumnType("datetime")
-                    .HasDefaultValueSql("(getdate())");
-
-                entity.HasOne(d => d.PaymentPlan)
-                    .WithMany(p => p.Contracts)
-                    .HasForeignKey(d => d.PaymentPlanId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Contract_PaymentPlan");
-
-                entity.HasOne(d => d.Person)
-                    .WithMany(p => p.Contracts)
-                    .HasForeignKey(d => d.PersonId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Contract_Person");
-
-                entity.HasOne(d => d.Property)
-                    .WithMany(p => p.Contracts)
-                    .HasForeignKey(d => d.PropertyId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Contract_Property");
-            });
-
             modelBuilder.Entity<Payment>(entity =>
             {
                 entity.ToTable("Payment");
 
-                entity.HasIndex(e => new { e.ContractId, e.PaymentNumber }, "UK_Payment_ContractID_PaymentNumber")
+                entity.HasIndex(e => new { e.PropertyId, e.PaymentNumber }, "UK_Payment_PropertyId_PaymentNumber")
                     .IsUnique();
 
-                entity.Property(e => e.PaymentId).HasColumnName("PaymentID");
-
-                entity.Property(e => e.ContractId).HasColumnName("ContractID");
+                entity.Property(e => e.PaymentId)
+                    .ValueGeneratedNever()
+                    .HasColumnName("PaymentID");
 
                 entity.Property(e => e.Description)
                     .HasMaxLength(128)
@@ -158,6 +193,8 @@ namespace Infrastructure.Persistence
 
                 entity.Property(e => e.PreviousBalancePayable).HasColumnType("decimal(10, 2)");
 
+                entity.Property(e => e.PropertyId).HasColumnName("PropertyID");
+
                 entity.Property(e => e.ReceiverId).HasColumnName("ReceiverID");
 
                 entity.Property(e => e.RegistrationDate)
@@ -166,17 +203,17 @@ namespace Infrastructure.Persistence
 
                 entity.Property(e => e.TotalAmount).HasColumnType("decimal(10, 2)");
 
-                entity.HasOne(d => d.Contract)
-                    .WithMany(p => p.Payments)
-                    .HasForeignKey(d => d.ContractId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Payment_Contract");
-
                 entity.HasOne(d => d.Payer)
                     .WithMany(p => p.PaymentPayers)
                     .HasForeignKey(d => d.PayerId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Payment_Person1");
+
+                entity.HasOne(d => d.Agreement)
+                    .WithMany(p => p.Payments)
+                    .HasForeignKey(d => d.PropertyId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_Payment_Agreement");
 
                 entity.HasOne(d => d.Receiver)
                     .WithMany(p => p.PaymentReceivers)
@@ -272,6 +309,9 @@ namespace Infrastructure.Persistence
             modelBuilder.Entity<Person>(entity =>
             {
                 entity.ToTable("Person");
+
+                entity.HasIndex(e => e.NationalId, "UK_Person_NationalID")
+                    .IsUnique();
 
                 entity.Property(e => e.PersonId).HasColumnName("PersonID");
 
@@ -446,9 +486,37 @@ namespace Infrastructure.Persistence
                         });
             });
 
+            modelBuilder.HasSequence<int>("PaymentIdentifier").HasMin(1);
+
+            modelBuilder.HasSequence<int>("TokenIdentifier").HasMin(1);
+
             OnModelCreatingPartial(modelBuilder);
         }
 
         partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
+
+        public async Task<int> GetTokenIdentifier()
+        {
+            SqlParameter tokenIdentifier = new(nameof(tokenIdentifier), System.Data.SqlDbType.Int)
+            {
+                Direction = System.Data.ParameterDirection.Output
+            };
+
+            await Database.ExecuteSqlRawAsync($"SELECT @{tokenIdentifier} = (NEXT VALUE FOR TokenIdentifier)", tokenIdentifier);
+
+            return (int)tokenIdentifier.Value;
+        }
+
+        public async Task<int> GetPaymentIdentifier()
+        {
+            SqlParameter paymentIdentifier = new(nameof(paymentIdentifier), System.Data.SqlDbType.Int)
+            {
+                Direction = System.Data.ParameterDirection.Output
+            };
+
+            await Database.ExecuteSqlRawAsync($"SELECT @{paymentIdentifier} = (NEXT VALUE FOR PaymentIdentifier)", paymentIdentifier);
+
+            return (int)paymentIdentifier.Value;
+        }
     }
 }

@@ -16,7 +16,7 @@ namespace Api.Controllers
 
         public int PersonId { get; set; }
 
-        public Guid TokenId { get; set; }
+        public int TokenId { get; set; }
 
         public ApplicationContext DbContext { get; set; }
 
@@ -57,7 +57,7 @@ namespace Api.Controllers
                     {
                         response.Code = ResponseCode.Conflict;
                         response.Message = ResponseMessage.EnterANewPassword;
-                        response.Data = _tokenManager.GenerateToken(user, TokenType.Reset);
+                        response.Data = await _tokenManager.GenerateToken(user, TokenType.Reset);
 
                         await DbContext.Database.ExecuteSqlRawAsync($"UPDATE [Token] SET [Disabled] = 1 WHERE [PersonID] = {user.PersonId}");
 
@@ -82,7 +82,7 @@ namespace Api.Controllers
                     }
 
                     response.Code = ResponseCode.Ok;
-                    response.Data = _tokenManager.GenerateToken(user, TokenType.Access);
+                    response.Data = await _tokenManager.GenerateToken(user, TokenType.Access);
 
                     await DbContext.Database.ExecuteSqlRawAsync($"UPDATE [Token] SET [Disabled] = 1 WHERE [PersonID] = {user.PersonId}");
 
@@ -143,7 +143,7 @@ namespace Api.Controllers
                 user.PasswordHash = passwordHasher.HashPassword(user, request.NewPassword);
                 user.ResetPassword = false;
                 response.Code = ResponseCode.Ok;
-                response.Data = _tokenManager.GenerateToken(user, TokenType.Access);
+                response.Data = await _tokenManager.GenerateToken(user, TokenType.Access);
 
                 await DbContext.Tokens.AddAsync(response.Data);
                 await DbContext.SaveChangesAsync();

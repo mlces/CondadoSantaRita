@@ -2,7 +2,7 @@
 
 namespace Core.Models.Request
 {
-    public class ContractRequest
+    public class AgreementRequest
     {
         [Required]
         public int PropertyId { get; set; }

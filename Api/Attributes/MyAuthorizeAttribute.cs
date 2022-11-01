@@ -27,7 +27,7 @@ namespace Api.Attributes
                     controller.PersonId = claim != null ? int.Parse(claim.Value) : default;
 
                     claim = user.FindFirst(ClaimTypes.Sid);
-                    controller.TokenId = claim != null ? new(claim.Value) : default;
+                    controller.TokenId = claim != null ? int.Parse(claim.Value) : default;
 
                     bool tokenDisabled = controller.DbContext.Tokens
                         .AsNoTracking()

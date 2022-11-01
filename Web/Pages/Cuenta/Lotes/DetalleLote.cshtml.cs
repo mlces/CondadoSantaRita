@@ -18,7 +18,7 @@ namespace Web.Pages.Cuenta.Lotes
         [FromQuery]
         public int id { get; set; }
 
-        public Contract Contract { get; set; } = new();
+        public Agreement Agreement { get; set; } = new();
 
         public List<Payment> Payments { get; set; } = new();
 
@@ -33,7 +33,7 @@ namespace Web.Pages.Cuenta.Lotes
             {
                 _httpClient.DefaultRequestHeaders.Authorization = new("Bearer", User.FindFirst(ClaimTypes.Authentication).Value);
 
-                var response = await _httpClient.GetAsync($"Contracts/{id}");
+                var response = await _httpClient.GetAsync($"Agreements/{id}");
 
                 if (response.StatusCode == HttpStatusCode.Unauthorized)
                 {
@@ -45,7 +45,7 @@ namespace Web.Pages.Cuenta.Lotes
                     return RedirectToPage(Constants.PageError);
                 }
 
-                var content = await response.Content.ReadFromJsonAsync<Response<Contract>>();
+                var content = await response.Content.ReadFromJsonAsync<Response<Agreement>>();
 
                 if (content.Code == ResponseCode.Unauthorized)
                 {
@@ -57,7 +57,7 @@ namespace Web.Pages.Cuenta.Lotes
                     return RedirectToPage(Constants.PageError);
                 }
 
-                var response2 = await _httpClient.GetAsync($"Contracts/{id}/Payments");
+                var response2 = await _httpClient.GetAsync($"Agreements/{id}/Payments");
 
                 if (response2.StatusCode == HttpStatusCode.Unauthorized)
                 {
@@ -81,7 +81,7 @@ namespace Web.Pages.Cuenta.Lotes
                     return RedirectToPage(Constants.PageError);
                 }
 
-                Contract = content.Data;
+                Agreement = content.Data;
                 Payments = content2.Data;
                 return Page();
             }

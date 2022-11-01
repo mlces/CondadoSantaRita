@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Security.Claims;
 
-namespace Web.Pages.Administracion.Contratos
+namespace Web.Pages.Administracion.Convenios
 {
     public class AgregarModel : PageModel
     {
@@ -13,7 +13,7 @@ namespace Web.Pages.Administracion.Contratos
         public int id { get; set; }
 
         [BindProperty]
-        public ContractRequest Input { get; set; } = new();
+        public AgreementRequest Input { get; set; } = new();
 
         public AgregarModel(HttpClient httpClient)
         {
@@ -89,7 +89,7 @@ namespace Web.Pages.Administracion.Contratos
 
                 PaymentPlans = new(content2.Data, nameof(PaymentPlan.PaymentPlanId), nameof(PaymentPlan.Name));
 
-                var response3 = await _httpClient.GetAsync($"Properties/WithoutContract/{id}");
+                var response3 = await _httpClient.GetAsync($"Properties/WithoutAgreement/{id}");
 
                 if (response3.StatusCode == HttpStatusCode.Unauthorized)
                 {
@@ -136,7 +136,7 @@ namespace Web.Pages.Administracion.Contratos
             {
                 _httpClient.DefaultRequestHeaders.Authorization = new("Bearer", User.FindFirst(ClaimTypes.Authentication).Value);
 
-                var response = await _httpClient.PostAsJsonAsync($"Contracts", Input);
+                var response = await _httpClient.PostAsJsonAsync($"Agreements", Input);
 
                 if (response.StatusCode == HttpStatusCode.Unauthorized)
                 {
@@ -148,7 +148,7 @@ namespace Web.Pages.Administracion.Contratos
                     return RedirectToPage(Constants.PageError);
                 }
 
-                var content = await response.Content.ReadFromJsonAsync<Response<Contract>>();
+                var content = await response.Content.ReadFromJsonAsync<Response<Agreement>>();
 
                 if (content.Code == ResponseCode.Unauthorized)
                 {
@@ -160,7 +160,7 @@ namespace Web.Pages.Administracion.Contratos
                     return RedirectToPage(Constants.PageError);
                 }
 
-                return RedirectToPage(Constants.PageAdminDetalleLote, new { id = content.Data.ContractId });
+                return RedirectToPage(Constants.PageAdminDetalleLote, new { id = content.Data.PropertyId });
             }
             catch (Exception)
             {

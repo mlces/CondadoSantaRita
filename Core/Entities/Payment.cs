@@ -8,7 +8,7 @@
         }
 
         public int PaymentId { get; set; }
-        public int ContractId { get; set; }
+        public int PropertyId { get; set; }
         public int PaymentNumber { get; set; }
         public string Description { get; set; } = null!;
         public decimal PreviousBalancePaid { get; set; }
@@ -20,8 +20,8 @@
         public int PayerId { get; set; }
         public DateTime RegistrationDate { get; set; }
 
-        public virtual Contract Contract { get; set; } = null!;
         public virtual Person Payer { get; set; } = null!;
+        public virtual Agreement Agreement { get; set; } = null!;
         public virtual Person Receiver { get; set; } = null!;
         public virtual PaymentReceipt? PaymentReceipt { get; set; }
         public virtual ICollection<PaymentDetail> PaymentDetails { get; set; }

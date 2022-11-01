@@ -6,7 +6,6 @@ namespace Core.Entities
     {
         public Person()
         {
-            Contracts = new HashSet<Contract>();
             PaymentPayers = new HashSet<Payment>();
             PaymentReceivers = new HashSet<Payment>();
         }
@@ -22,7 +21,7 @@ namespace Core.Entities
 
         public virtual Address? Address { get; set; }
         public virtual User? User { get; set; }
-        public virtual ICollection<Contract> Contracts { get; set; }
+        public virtual ICollection<Agreement> Agreements { get; set; }
         [JsonIgnore]
         public virtual ICollection<Payment> PaymentPayers { get; set; }
         [JsonIgnore]

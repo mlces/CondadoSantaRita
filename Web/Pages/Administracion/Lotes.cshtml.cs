@@ -14,7 +14,7 @@ namespace Web.Pages.Administracion
         {
             _httpClient = httpClient;
         }
-        public List<Contract> Contracts { get; set; } = new();
+        public List<Agreement> Agreements { get; set; } = new();
 
         public async Task<ActionResult> OnGet()
         {
@@ -27,7 +27,7 @@ namespace Web.Pages.Administracion
             {
                 _httpClient.DefaultRequestHeaders.Authorization = new("Bearer", User.FindFirst(ClaimTypes.Authentication).Value);
 
-                var response = await _httpClient.GetAsync("Contracts");
+                var response = await _httpClient.GetAsync("Agreements");
 
                 if (response.StatusCode == HttpStatusCode.Unauthorized)
                 {
@@ -39,7 +39,7 @@ namespace Web.Pages.Administracion
                     return RedirectToPage(Constants.PageError);
                 }
 
-                var content = await response.Content.ReadFromJsonAsync<Response<List<Contract>>>();
+                var content = await response.Content.ReadFromJsonAsync<Response<List<Agreement>>>();
 
                 if (content.Code == ResponseCode.Unauthorized)
                 {
@@ -51,7 +51,7 @@ namespace Web.Pages.Administracion
                     return RedirectToPage(Constants.PageError);
                 }
 
-                Contracts = content.Data;
+                Agreements = content.Data;
                 return Page();
             }
             catch (Exception)

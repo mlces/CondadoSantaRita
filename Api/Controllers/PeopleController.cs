@@ -13,7 +13,7 @@ namespace Api.Controllers
     {
         public int PersonId { get; set; }
 
-        public Guid TokenId { get; set; }
+        public int TokenId { get; set; }
 
         public ApplicationContext DbContext { get; set; }
 
@@ -83,9 +83,9 @@ namespace Api.Controllers
 
         [HttpGet]
         [Route("{personId}/[action]")]
-        public async Task<ActionResult> Contracts(int personId)
+        public async Task<ActionResult> Agreements(int personId)
         {
-            var response = new Response<List<Contract>>();
+            var response = new Response<List<Agreement>>();
             try
             {
                 if (!User.IsInRole(Rol.Administrador.Name))
@@ -93,13 +93,14 @@ namespace Api.Controllers
                     personId = PersonId;
                 }
 
-                var contracts = await DbContext.Contracts
+                var Agreements = await DbContext.Agreements
+                    .Include(o => o.Person)
                     .Include(o => o.Property)
                     .Where(o => o.PersonId == personId)
                     .ToListAsync();
 
                 response.Code = ResponseCode.Ok;
-                response.Data = contracts;
+                response.Data = Agreements;
                 return Ok(response);
             }
             catch (Exception ex)
